@@ -1,0 +1,186 @@
+#####################################
+#                                   #
+#    Code Commenting Examples       #
+#                                   #
+#####################################
+#####################################
+
+The following is a list of what should be documented in php files:
+
+    - Functions and class methods
+    - Classes
+    - Class properties
+    - Requires and includes
+    - Hooks (actions and filters)
+    - Inline comments
+    - File headers
+    - Constants
+
+Language: Summaries (formerly Short Descriptions) should be clear and brief. 
+Document “what” and “when” – “why” should rarely need to be included. For example:
+
+    Functions: What does the function do?
+    - Good: Display last modified date for a post.
+    - Bad:  Displays the date on which the post was last modified.
+
+    Filters: What is being filtered?
+    - Good: Filter the post content.
+    - Bad:  Lets you edit the post content that is output in the post template.
+
+    Actions: When does an action fire?
+    - Good: Fires after most of core is loaded, and the user is authenticated.
+    - Bad:  Allows you to register custom post types, custom taxonomies, and 
+            other general housekeeping tasks after a lot of WordPress core has loaded.
+
+
+
+
+
+#####################################
+#    Documenting Descriptors        #
+# - - - - - - - - - - - - - - - - - #
+
+@access:     Indicates access control for a function/method.
+
+@deprecated: What version of WordPress the function/method was deprecated. 
+             Use 3-digit version number. 
+
+@global:     Document global(s) used in the function/method. For boolean and 
+             integer types, use bool and int, respectively.
+
+@internal:   Typically used for adding notes for internal use only.
+
+@ignore:     Used to skip parsing of the entire element.
+
+@link:       Link to additional information for the function/method. For an external
+             script/library, links to source.
+
+@method:     Shows a “magic” method found inside the class.
+
+@package:    Specifies package that all functions, includes, and defines in the file
+             belong to. Found in DocBlock at top of the file. 
+
+@param:      datatype $variable description
+
+@return:     Document the return value of functions or methods. 
+
+@see:        References another function/method/class the function/method relies on.
+
+@since:      Documents release version function/method was added. 
+             Use 3-digit version number - x.x.x
+
+@subpackage: For page-level DocBlock, specifies the Component that all functions
+             and defines in file belong to. For class-level DocBlock, specifies the
+             subpackage/component the class belongs to.
+
+@todo:       Documents planned changes to an element that have not been implemented.
+
+@type:       Used to denote argument array value types. See the Hooks or Parameters
+             That Are Arrays sections for example syntax.
+
+@var:        Data type for a class variable and short description.
+
+
+
+
+
+
+#####################################
+#    File Headers                   #
+# - - - - - - - - - - - - - - - - - #
+
+/**
+ * Summary (no period for file headers)
+ *
+ * Description. (use period)
+ *
+ * @link URL
+ * @since x.x.x (if available)
+ *
+ * @package WordPress
+ * @subpackage Component
+ */
+
+
+
+
+
+#####################################
+#    Constants                      #
+# - - - - - - - - - - - - - - - - - #
+
+/**
+ * Summary.
+ *
+ * @since x.x.x
+ * @access (private, protected, or public)
+ * @var type $var Description.
+ */
+
+
+
+
+
+#####################################
+#    Inline Commenting              #
+# - - - - - - - - - - - - - - - - - #
+
+// Single line comments.
+
+/* 
+ * This is a comment that is long enough to warrant being stretched over
+ * the span of multiple lines. You'll notice this follows basically
+ * the same format as the PHPDoc wrapping and comment block style.
+ */
+
+
+
+
+
+#####################################
+#    Function / Method Comments     #
+# - - - - - - - - - - - - - - - - - #
+
+/**
+ * Summary.
+ *
+ * Description.
+ *
+ * @since x.x.x
+ *
+ * @param type  $var Description.
+ * @param array $args {
+ *     Short description about this hash.
+ *
+ *     @type type $var Description.
+ *     @type type $var Description.
+ * }
+ * @param type  $var Description.
+ */
+
+
+
+
+
+#####################################
+#    Class Documenting Comments     #
+# - - - - - - - - - - - - - - - - - #
+
+/**
+ * Summary.
+ *
+ * @since x.x.x
+ * @access (private, protected, or public)
+ * @var type $var Description.
+ */
+
+
+
+
+
+#####################################
+#####################################
+#                                   #
+#                END                #
+#                                   #
+#####################################

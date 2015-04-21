@@ -1,0 +1,5 @@
+{
+    "icon": "fa-home",
+    "title": "My Dashboard",
+    "link": "#pages/_dashboard/index.php"
+}
