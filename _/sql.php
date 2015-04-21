@@ -1,35 +1,21 @@
 <?php
-/**
- * DB - Database Class
- * --------------------------------------------------
- * @param string $name Name of connection
- * @param string $host host to connect to
- * @param string $user username for database
- * @param string $pass password for user
- * --------------------------------------------------
- **/
-
-
 /* 
+### DB - Database Class
 # --------------------------------------------------
 # HOW TO USE
 # --------------------------------------------------
-#
 # Create a new Database Class with Initial DB Connection
 # --------------------------------------------------
-
 $DB = new DB($name1, $host, $user, $pass);
 
 #
 # Establish addition DB Connections 
 # --------------------------------------------------
-
 $DB->C($name2, $host, $user, $pass);
 
 #
 # Set up database query
 # --------------------------------------------------
-
 $HDT = $name1.'.database.table'	// hostName.dbName.tblName
 $W = ['a'=>1,'b'=>2] 			// WHERE `a`=1 AND `b`=2
 $W['c__<='] = 10				// WHERE `a`=1 AND `b`=2 AND `c` <= 10
@@ -38,14 +24,21 @@ $F = ['a', 'b', 'c']; 			// SELECT `a`,`b`,`c` FROM ...
 #
 # Query the database
 # --------------------------------------------------
-
 $DB->GET($HDT, $W, $F);
 
 # --------------------------------------------------
 */
 
 
-
+/**
+ * DB - Database Class
+ * --------------------------------------------------
+ * @param string $N Name of connection
+ * @param string $H host to connect to
+ * @param string $U username for database
+ * @param string $P password for user
+ * --------------------------------------------------
+ **/
 class DB {
 
 	var $H;// HOST
@@ -62,191 +55,184 @@ class DB {
 	var $lID = 0;// LAST ID
 	var $Key = array('id' => false);// Result Row Identifier 'name'=> true|false
 
+	public function __construct($N, $H = 'localhost', $U = 'root', $P = false) 
+		{
+			$P = empty($P)?PASS:$P;
+			$this->C($N, $H, $U, $P);
+			$this->N = $N;
+		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * C ( $N, $H, $U, $P )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Connect to a mysql database with credentials
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $N Name of connection
+	 * @param string $H host to connect to
+	 * @param string $U username for database
+	 * @param string $P password for user
 	 * --------------------------------------------------
 	 **/
-	public function __construct($N, $H = 'localhost', $U = 'root', $P = false) {
-		if (!$P) {$P = PASS;}
-		$this->C($N, $H, $U, $P);
-		$this->N = $N;
-	}
+	public function C($N, $H, $U, $P)
+		{
+			$S = mysql_connect($H, $U, $P, true, MYSQL_CLIENT_COMPRESS);
+			if($S){
+				$this->S[$N] = $S;
+				return true;
+			}
+			$this->E("Could Not Connect to {$H}");
+		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * E ( $M )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Record an error to the class object $this->E[]
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $M Error to record
 	 * --------------------------------------------------
 	 **/
-	public function C($N, $H, $U, $P) {
-		$S                    = mysql_connect($H, $U, $P, true, MYSQL_CLIENT_COMPRESS) or die('No Database Connection!');
-		if ($S) {$this->S[$N] = $S;} else { $this->E("Could Not Connect to {$H}");}
-	}
+	public function E($M = false)
+		{
+			$S = $this->S[$this->H];
+			$this->R = false;
+			$this->E[] = "Database Error: (".$M.") - ".mysql_error($S);
+		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * W ( $vA, $M )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Wash value array and prep for db query
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param mixed $vA Value array
+	 * @param string $M Method to use for preping
 	 * --------------------------------------------------
 	 **/
-	public function E($M = false) {
-		$S         = $this->S[$this->H];
-		$this->R   = false;
-		$this->E[] = "Database Error: (".$M.") - ".mysql_error($S);
-	}
-	/**
-	 * FunctionName ( $x [, $y [, $z]] )
-	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * --------------------------------------------------
-	 **/
-	public function W($vA = false, $M = false) {
-		if ($M == 'S') {
-			if (is_array($vA)) {
-				foreach ($vA as $k => $v) {
-					$v = $this->xQ($v);
-					if (stristr($v, '`') || stristr($v, '(')) {
-						$a[] = "`$k`={$v}";
-					} else {
-						$a[] = "`$k`=\"{$v}\"";
+	public function W($vA = false, $M = false)
+		{
+			if ($M == 'S') {
+				if (is_array($vA)) {
+					foreach ($vA as $k => $v) {
+						$v = $this->xQ($v);
+						if (stristr($v, '`') || stristr($v, '(')) {
+							$a[] = "`$k`={$v}";
+						} else {
+							$a[] = "`$k`=\"{$v}\"";
+						}
 					}
+					$vA = implode(',', $a);
+				}
+			} elseif ($M == 'V') {
+				foreach ($vA as $k => $v)
+				if (!is_array($v)) {$a[] = "'".(string) $this->xQ($v)."'";} else { $a[] = "(".$this->W($v, $M).")";}
+				$vA                      = implode(',', $a);
+			} elseif ($M == 'F' && is_array($vA)) {
+				foreach ($vA as $k => $v) {
+					$t                         = $v;
+					if (!is_numeric($k)) {$t   = $k;
+						if (stristr($k, '(')) {
+							$v = $t." AS `".$this->xQ($v)."`";
+						} else { 
+							$v = "`".$t."` AS `".$this->xQ($v)."`";
+						}
+					} elseif (str_ireplace(array('`', '(', ')', '.'), '', $v) !== $v) {
+						$v = $this->xQ($v);
+					} else { 
+						$v = "`".$this->xQ($v)."`";
+					}
+					$a[] = $v;
 				}
 				$vA = implode(',', $a);
-			}
-		} elseif ($M == 'V') {
-			foreach ($vA as $k => $v)
-			if (!is_array($v)) {$a[] = "'".(string) $this->xQ($v)."'";} else { $a[] = "(".$this->W($v, $M).")";}
-			$vA                      = implode(',', $a);
-		} elseif ($M == 'F' && is_array($vA)) {
-			foreach ($vA as $k => $v) {
-				$t                         = $v;
-				if (!is_numeric($k)) {$t   = $k;
-					if (stristr($k, '(')) {
-						$v = $t." AS `".$this->xQ($v)."`";
-					} else { 
-						$v = "`".$t."` AS `".$this->xQ($v)."`";
-					}
-				} elseif (str_ireplace(array('`', '(', ')', '.'), '', $v) !== $v) {
-					$v = $this->xQ($v);
-				} else { 
-					$v = "`".$this->xQ($v)."`";
-				}
-				$a[] = $v;
-			}
-			$vA = implode(',', $a);
-		} elseif ($M == 'P' && is_array($vA)) {
-			foreach ($vA as $k => $v) {
-				$t = $v;
-				if (!is_numeric($k)) {$t = $k;}
-				$a[] = "`".$this->xQ($t)."`";
-			}
-			$vA = "(".implode(',', $a).")";
-		} elseif ($M == 'G') {
-			if (is_array($vA)) {
+			} elseif ($M == 'P' && is_array($vA)) {
 				foreach ($vA as $k => $v) {
-					$v = $this->xQ($v);
-					unset($eq);
-					if (stristr($k, '__')) {list($k, $eq) = explode('__', $k, 2);}
-					$eq                                   = emptY($eq)?' = ':str_pad($eq, (strlen($eq)+2), ' ', STR_PAD_BOTH);
-					if (stristr($eq, 'IN')) {
-						if (!is_array($v)) {$v = array($v);}
-						foreach ($v as &$val)
-						if (!is_numeric($val) && (str_ireplace(array('`', '(', ')'), '', $val) == $val)) {$val = "'".$val."'";}
-						$v                                                                                = '('.implode(', ', $v).')';
-					} elseif (str_ireplace(array('>=', '>', '<', '<=', '!='), '', $eq) != $eq) {
-						if (!is_numeric($v)) {$v = "'".$v."'";}
-					} elseif (stristr($eq, 'BETWEEN')) {
-						$_beg = is_numeric(key($v))?key($v):"'".key($v)."'";
-						$_end = is_numeric($v[$_beg])?$v[$_beg]:"'".$v[$_beg]."'";
-						$v    = $_beg." AND ".$_end;
-					} elseif (stristr($k, 'ORDER')) {
-						$eq = ' BY ';
-						if (!is_array($v)) {
-							$v = array($v => 'ASC');
-						}
-						foreach ($v as $f => $ord) {
-							if (stristr($f, '`') || stristr($f, '(')) {
-								$F[] = $f;
-							} else {
-								$F[] = "`".$f."` ".$ord;
+					$t = $v;
+					if (!is_numeric($k)) {$t = $k;}
+					$a[] = "`".$this->xQ($t)."`";
+				}
+				$vA = "(".implode(',', $a).")";
+			} elseif ($M == 'G') {
+				if (is_array($vA)) {
+					foreach ($vA as $k => $v) {
+						$v = $this->xQ($v);
+						unset($eq);
+						if (stristr($k, '__')) {list($k, $eq) = explode('__', $k, 2);}
+						$eq                                   = emptY($eq)?' = ':str_pad($eq, (strlen($eq)+2), ' ', STR_PAD_BOTH);
+						if (stristr($eq, 'IN')) {
+							if (!is_array($v)) {$v = array($v);}
+							foreach ($v as &$val)
+							if (!is_numeric($val) && (str_ireplace(array('`', '(', ')'), '', $val) == $val)) {$val = "'".$val."'";}
+							$v                                                                                = '('.implode(', ', $v).')';
+						} elseif (str_ireplace(array('>=', '>', '<', '<=', '!='), '', $eq) != $eq) {
+							if (!is_numeric($v)) {$v = "'".$v."'";}
+						} elseif (stristr($eq, 'BETWEEN')) {
+							$_beg = is_numeric(key($v))?key($v):"'".key($v)."'";
+							$_end = is_numeric($v[$_beg])?$v[$_beg]:"'".$v[$_beg]."'";
+							$v    = $_beg." AND ".$_end;
+						} elseif (stristr($k, 'ORDER')) {
+							$eq = ' BY ';
+							if (!is_array($v)) {
+								$v = array($v => 'ASC');
 							}
-						}
-						$v = implode(', ', $F);
-					} elseif (stristr($k, 'GROUP')) {
-						$eq = ' BY ';
-						if (!is_array($v)) {$v = array($v);}
-						foreach ($v as &$val) {$val = "`".$val."`";}
-						$v = implode(', ', $v);
-					} elseif (stristr($k, 'JOIN')) {
-						$eq   = ' ON ';
-						$DB   = $this->D;
-						$TBL1 = $this->T;
-						$TBL2 = key($v);
-						$KEYS = $v[$TBL2];
-						$K1   = key($KEYS);
-						$K2   = $KEYS[$K1];
-						$k    = ' INNER JOIN `'.$DB.'`.`'.$TBL2.'`';
-						$v    = '`'.$TBL1.'`.`'.$K1.'`=`'.$TBL2.'`.`'.$K2.'`';
+							foreach ($v as $f => $ord) {
+								if (stristr($f, '`') || stristr($f, '(')) {
+									$F[] = $f;
+								} else {
+									$F[] = "`".$f."` ".$ord;
+								}
+							}
+							$v = implode(', ', $F);
+						} elseif (stristr($k, 'GROUP')) {
+							$eq = ' BY ';
+							if (!is_array($v)) {$v = array($v);}
+							foreach ($v as &$val) {$val = "`".$val."`";}
+							$v = implode(', ', $v);
+						} elseif (stristr($k, 'JOIN')) {
+							$eq   = ' ON ';
+							$DB   = $this->D;
+							$TBL1 = $this->T;
+							$TBL2 = key($v);
+							$KEYS = $v[$TBL2];
+							$K1   = key($KEYS);
+							$K2   = $KEYS[$K1];
+							$k    = ' INNER JOIN `'.$DB.'`.`'.$TBL2.'`';
+							$v    = '`'.$TBL1.'`.`'.$K1.'`=`'.$TBL2.'`.`'.$K2.'`';
 
-						$this->JOIN = $k.$eq.$v;
-					} elseif (stristr($k, 'LIKE')) {
-						if (!stristr($v, '%')) {
-							$v = '%'.$v.'%';
-						}
-					} elseif (!is_numeric($v)) {
-						$v = "'".$v."'";
-					}
-					if (str_ireplace(array('`', '(', ')', 'ORDER', 'GROUP', 'LIKE'), '', $k) == $k) {
-						$k = "`".$k."`";
-					}
-					if (!stristr($k, 'INNER JOIN')) {
-						$a[] = $k.$eq.$v;
-					}
-				}
-				$vA = implode(' AND ', $a);
-				$vA = str_ireplace('AND GROUP', 'GROUP', $vA);
-				$vA = str_ireplace('AND ORDER', 'ORDER', $vA);
-			}
-		} elseif ($M == 'W') {
-			if (is_array($vA)) {
-				foreach ($vA as $k => $v) {
-					if (is_array($v)) {
-						if (is_numeric($v)) {
-							foreach ($v as &$_v) {
-								$_v = $this->xQ($_v);
+							$this->JOIN = $k.$eq.$v;
+						} elseif (stristr($k, 'LIKE')) {
+							if (!stristr($v, '%')) {
+								$v = '%'.$v.'%';
 							}
+						} elseif (!is_numeric($v)) {
+							$v = "'".$v."'";
+						}
+						if (str_ireplace(array('`', '(', ')', 'ORDER', 'GROUP', 'LIKE'), '', $k) == $k) {
+							$k = "`".$k."`";
+						}
+						if (!stristr($k, 'INNER JOIN')) {
+							$a[] = $k.$eq.$v;
+						}
+					}
+					$vA = implode(' AND ', $a);
+					$vA = str_ireplace('AND GROUP', 'GROUP', $vA);
+					$vA = str_ireplace('AND ORDER', 'ORDER', $vA);
+				}
+			} elseif ($M == 'W') {
+				if (is_array($vA)) {
+					foreach ($vA as $k => $v)
+						if (is_array($v)) {
+							if (is_numeric($v))
+								foreach ($v as &$_v)
+									$_v = $this->xQ($_v);
+							else
+								foreach ($v as &$_v)
+									$_v = "'".$this->xQ($_v)."'";
+							$_V  = implode(',', $v);
+							$a[] = "`{$k}` IN ({$_V})";
 						} else {
-							foreach ($v as &$_v) {
-								$_v = "'".$this->xQ($_v)."'";
-							}
+							$v   = $this->xQ($v);
+							$a[] = "`{$k}`='{$v}'";
 						}
-						$_V  = implode(',', $v);
-						$a[] = "`{$k}` IN ({$_V})";
-					} else {
-						$v   = $this->xQ($v);
-						$a[] = "`{$k}`='{$v}'";
-					}
+					$vA = implode(' AND ', $a);
 				}
-				$vA = implode(' AND ', $a);
-			}}
-		return $vA;
-	}
+			}
+			return $vA;
+		}
 	/**
 	 * FunctionName ( $x [, $y [, $z]] )
 	 * --------------------------------------------------

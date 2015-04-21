@@ -16,9 +16,6 @@ $_content 	= html::pageLoad('pages/ips/modules/form.ip_details.php',$_id);
 $_width 	= html::Cols(12);
 $WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width);
 
-
-
-
 /**
  * View IP Ranges Table
  * --------------------------------------------------
@@ -45,24 +42,19 @@ $_id 		= 'IPPools';
 $_title 	= 'IP Pools';
 $_width 	= html::Cols(12);
 $_content 	= html::pageLoad('pages/ips/modules/ui.pools_manager.php',$_id);
-
-
 $Box 		= '<input type="text" name="pool_search" placeholder="poolName or IP" id="pool_search" value="" class="input-xs" />';
 $Btn 		= html::elmt('i',['class'=>'icon-append fa fa-search','id'=>'PoolSearch'],true);
 $SearchBox 	= $Box.$Btn;
-
-$_tools	= html::elmt('label','text '.html::Cols(12),$SearchBox);
-
-$_args = ['content'=>['class'=>'no-padding']];
-
+$_tools		= html::elmt('label','text '.html::Cols(12),$SearchBox);
+$_args 		= ['content'=>['class'=>'no-padding']];
 $WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width, $_tools, $_args);
 
-
-
+/**
+ * View IP Ranges Table
+ * --------------------------------------------------
+ **/
 echo html::elmt('div','row '.html::Cols(12,6,7,8),$WIDGETS);
-
-echo html::JS("
-$('i.toggleDTblTools').bind('click',function(){
+echo html::JS("$('i.toggleDTblTools').bind('click',function(){
 	$(this).parent().parent().parent().find('div.dt-toolbar').toggle('slow');
 });
 $('i#PoolSearch').bind('click',function(){

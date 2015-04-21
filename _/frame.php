@@ -97,12 +97,14 @@ class html {
     		$CSS['.smart-form']['.btn-xs']['height'] 				= '24px !important';
     		$CSS['.smart-form']['.btn-xs']['line-height'] 			= '14px !important';
     		$CSS['div.alert:hover']['cursor'] 						= 'pointer';
+    		$CSS['div.alert']['border-bottom'] 						= '1px solid';
     		$CSS['div.alert.alert-success:hover']['background'] 	= '#AFD19F';
     		$CSS['div.alert.alert-info:hover']['background'] 		= '#C1CDDE';
     		$CSS['div.alert.alert-warning:hover']['background'] 	= '#DECD95';
     		$CSS['div.alert.alert-danger:hover']['background'] 		= '#B85656';
     		$CSS['div[role=content]']['min-height']  				= '100px';
     		$CSS['div.jarviswidget']['div.dt-toolbar']['display'] 	= 'none';
+    		$CSS['div.hover:hover']['background'] 					= '#ececec';
 			return $CSS;
 		}
 	/**
@@ -329,30 +331,20 @@ class html {
 		}
 	static function Body($content)
 		{
-			list($body,$_body) = html::elmt('body',['class'=>['smart-style-1','fixed-header','fixed-navigation']]);
-			$_[] = $body;
+			$Ribbon  = self::Ribbon();
+			$Content = self::elmt('div',['id'=>'content'],$content);
 			$_[] = self::Header();
 			$_[] = self::ShortCuts();
 			$_[] = self::NavBar();
-			$_[] = '<div id="main" role="main">';
-			$_[] = self::Ribbon();
-			$_[] = '<div id="content">';
-			$_[] = $content;
-			$_[] = '</div>';
-			$_[] = '</div>';
+			$_[] = self::elmt('div',['id'=>'main','role'=>'main'],$Ribbon.$Content);
 			$_[] = self::Footer();
-			$_[] = '</body>';
-			$_ = implode(EOL,$_);
+			$_ = html::elmt('body','smart-style-1 fixed-header fixed-navigation',$_);
 			return $_;
 		}
 	/**
 	 * FunctionName ( $x [, $y [, $z]] )
 	 * --------------------------------------------------
 	 * Description of function here
-	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
 	 * --------------------------------------------------
 	 **/
 	static function Ribbon()
@@ -1066,6 +1058,7 @@ h1.Loading .inner span:nth-child(7)  {
 			$O['div']['id'] = $id;
 			$O['content']['role'] = 'content';
 			$O['header']['role'] = 'heading';
+			$O['article']['class'] .= ' animated bounceInUp fast';
 
 			if(!empty($args)){
 				$args = is_array($args)?$args:[$args];
