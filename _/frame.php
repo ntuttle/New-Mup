@@ -627,13 +627,13 @@ class html {
 						$_[] = '<ul>';
 						foreach($links['sub'] as $sub=>$link){
 							$_[] = '<li>';
-							$_[] = '<a href="#'.$page.'/'.$link.'" title="'.ucfirst($sub).'"><span class="menu-item-parent">'.ucwords(str_ireplace('_',' ',$sub)).'</span></a>';
+							$_[] = '<a href="'.$page.'/'.$link.'" title="'.ucfirst($sub).'"><span class="menu-item-parent">'.ucwords(str_ireplace('_',' ',$sub)).'</span></a>';
 							$_[] = '</li>';
 						}
 						$_[] = '</ul>';
 					}
 				}else
-					$_[] = '<a href="#'.$page.'/'.$links.'" title="'.ucfirst($parent).'"><span class="menu-item-parent">'.ucwords(str_ireplace('_',' ',$parent)).'</span></a>';
+					$_[] = '<a href="'.$page.'/'.$links.'" title="'.ucfirst($parent).'"><span class="menu-item-parent">'.ucwords(str_ireplace('_',' ',$parent)).'</span></a>';
 				$_[] = '</li>';
 			}
 			$_[] = '</ul>';

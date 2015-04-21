@@ -35,6 +35,16 @@ echo html::elmt('div','row '.html::Cols(12,6,5,4),$WIDGETS);
 $WIDGETS = [];
 
 /**
+ * Update IP Details Form
+ * --------------------------------------------------
+ **/
+$_id 		= 'PoolIPForm';
+$_title 	= 'Add IPs to a Pool';
+$_content 	= html::pageLoad('pages/ips/modules/form.pool_ips.php',$_id);
+$_width 	= html::Cols(12,12,12,4);
+$WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width);
+
+/**
  * View IP Ranges Table
  * --------------------------------------------------
  **/
@@ -48,16 +58,6 @@ $SearchBox 	= $Box.$Btn;
 $_tools		= html::elmt('label','text '.html::Cols(12),$SearchBox);
 $_args 		= ['content'=>['class'=>'no-padding']];
 $WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width, $_tools, $_args);
-
-/**
- * Update IP Details Form
- * --------------------------------------------------
- **/
-$_id 		= 'PoolIPForm';
-$_title 	= 'Add IPs to a Pool';
-$_content 	= html::pageLoad('pages/ips/modules/form.pool_ips.php',$_id);
-$_width 	= html::Cols(12,12,12,4);
-$WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width);
 
 /**
  * View IP Ranges Table
