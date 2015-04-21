@@ -4,9 +4,9 @@ if(!defined('DIR')){
 }
 require_once DIR.'/_/conf.php';
 require_once DIR.'/_/sql.php';
-require_once DIR.'/_/htm/frame.php';
-require_once DIR.'/_/htm/table.php';
-require_once DIR.'/_/htm/form.php';
+require_once DIR.'/_/frame.php';
+require_once DIR.'/_/table.php';
+require_once DIR.'/_/form.php';
 
 
 class X {
