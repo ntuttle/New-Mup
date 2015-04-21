@@ -256,7 +256,7 @@ class FORMS {
 	 * @param int $height pixels for height
 	 * --------------------------------------------------
 	 **/
-	public function Textarea($name, $value = false, $label = true, $width = false, $height = false) {
+	public function Textarea($name, $value = false, $label = true, $width = false, $height = false, $ToolTip) {
 		if ($label === true) {$this->Label($name);} elseif ($label) {$this->Label($label);}
 		if ($value === false) {$value = @$_REQUEST[$name];}
 		if (is_numeric($width)) {
@@ -274,6 +274,8 @@ class FORMS {
 		$this->FORM[$this->id][] = "<label class=\"textarea col-xs-12\">";
 		$id = str_replace('[]', '', $name);
 		$this->FORM[$this->id][] = "<textarea {$height} name=\"$name\" id=\"$id\" >$value</textarea>";
+		if ($ToolTip) {
+			$this->FORM[$this->id][] = "<b class=\"tooltip tooltip-top-left\">".$ToolTip."</b>";}
 		$this->FORM[$this->id][] = "</label>";
 		$this->FORM[$this->id][] = "</section>";
 	}

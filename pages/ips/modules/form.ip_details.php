@@ -25,7 +25,8 @@ $F->Select('active',$ACTIVE,false,false,false,html::Cols(3,4));
 $F->Write('</div>');
 
 $F->Write('<div class="row">');
-$F->Text('ip',false,'IP(s)',html::Cols(9,10),'Specific IPs and IP Ranges seperated by a comma, space or tab:<br> - 127.0.0.1, 192.168.0.1, 192.168.0.10-128, ...<br><br>Ranges are formatted like:<br>127.0.0.1-255 -or- 127.0.0.1-127.0.0.255');
+$ToolTip = 'Specific IPs and IP Ranges seperated by a comma, space or tab:<br> - 127.0.0.1, 192.168.0.1, 192.168.0.10-128, ...<br><br>Ranges are formatted like:<br>127.0.0.1-255 -or- 127.0.0.1-127.0.0.255';
+$F->Text('ip',false,'IP(s)',html::Cols(9,10),$ToolTip);
 $F->Write('</div>');
 
 $type = 'info';

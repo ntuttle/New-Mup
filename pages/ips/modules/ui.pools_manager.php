@@ -74,13 +74,11 @@ foreach($Q as $i=>$q){
 	$Boxes[] = html::elmt('div',['class'=>['hover no-padding',html::Cols(12)]],$Box);
 }
 
-$div['style'] = 'height:475px;overflow-y:scroll';
+$div['style'] = 'height:260px;overflow-y:scroll';
 $c = 'no-padding custom-scroll table-responsive ';
-$div['class'] = $c.html::Cols(8);
+$div['class'] = $c.html::Cols(12);
 $Boxes = html::elmt('div',$div,$Boxes);
-$div['class'] = $c.html::Cols(4);
-$Form = html::elmt('div',$div,' ');
-$_P1 = html::elmt('div','no-padding',$Boxes.$Form);
+$_P1 = html::elmt('div','no-padding',$Boxes);
 
 $_ = $_P1;
 
