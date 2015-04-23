@@ -1,29 +1,27 @@
 <?php
-/**
- * Start the Page
- * --------------------------------------------------
- **/
+# Start the Page
 require_once $_SERVER['DOCUMENT_ROOT'].'/_/core.php';
 $X = new X();
 
 
-/**
- * IP Settings Variables
- * --------------------------------------------------
- **/
-$DATA = array_map('mysql_real_escape_string',$_REQUEST);
+# IP Settings Variables
+$DATA 		= array_map('mysql_real_escape_string',$_REQUEST);
+$_target 	= $DATA['target'];
+$_active 	= $DATA['active'];
+$_ips 		= X::parseIPs($DATA['ips']);
+$_mailing 	= $DATA['mdom'];
+$_content 	= $DATA['cdom'];
+$_msg_rate 	= $DATA['msg_rate'];
+$_msg_con 	= $DATA['msg_con'];
+$_con_rate 	= $DATA['con_rate'];
+$_reload 	= ($DATA['reload'] == 'on')?true:false;
+# For results message
+$_msg 	= 'Invalid IP Format supplied!';
+$_icon 	= 'warning';
+$_type 	= 'danger';
 
-$_target = $DATA['target'];
-$_active = $DATA['active'];
-$_ips = parseIPs($DATA['ips']);
-$_mailing = $DATA['mdom'];
-$_content = $DATA['cdom'];
-$_msg_rate = $DATA['msg_rate'];
-$_msg_con = $DATA['msg_con'];
-$_con_rate = $DATA['con_rate'];
-$_reload = ($DATA['reload'] == 'on')?true:false;
+# Compile ip settings update database query
 if(!empty($_ips)){
-
 	if(!empty($_msg_rate) || ($_msg_rate == '0'))
 		$S['msg_rate'] = $_msg_rate;
 	if(!empty($_msg_con)  || ($_msg_con == '0'))
@@ -36,60 +34,20 @@ if(!empty($_ips)){
 		$S['content'] = $_content;
 	$S['active'] = ($_active == 'no')?0:1;
 	
-
+	# Update ipconfig database with new settings
 	$HDT 	= 'MASTER.ipconfig.target_config';
 	$W 		= ['ip'=>$_ips,'target'=>$_target];
 	$X->DB->SET($HDT,$S,$W,10000);
 
+	# Compile results message
 	if($X->DB->aR > 0){
-		$msg = ' '.count($_ips).' ips supplied with '.$X->DB->aR.' ips updated...';
-		$I = 'check';
-		$type = 'success';
-	}else{
-		$msg = ' '.count($_ips).' ips supplied but no ips were updated!';
-		$I = 'warning';
-		$type = 'danger';
-	}
-}else{
-	$msg = 'Invalid IP Format supplied!';
-	$I = 'warning';
-	$type = 'danger';
+		$_msg 	= ' '.count($_ips).' ips supplied with '.$X->DB->aR.' ips updated...';
+		$_icon 	= 'check';
+		$_type 	= 'success';
+	}else
+		$_msg 	= ' '.count($_ips).' ips supplied but no ips were updated!';
 }
-echo html::alert($type,$msg,$I);
 
-
-
-
-/**
- * Functions
- * --------------------------------------------------
- **/
-function parseIPs($IPs)
-	{
-		$_IPs = [];
-		if(!empty($IPs)){
-			$IPs = str_ireplace([" ","\t","\r\n","\n"],',',$IPs);
-			$IPs = explode(',',$IPs);
-			foreach($IPs as $IP){
-				$IP = trim($IP);
-				if(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$IP,$x)){
-					$_IPs[] = ip2long($x[1]);
-				}elseif(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)([0-9]{1,3})\-([0-9]{1,3})$/',$IP,$x)){
-					for($i=$x[2];$i<=$x[3];$i++){
-						$_IPs[] = ip2long($x[1].$i);
-					}
-				}elseif(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\-([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$IP,$x)){
-					$start = ip2long($x[1]);
-					$end = ip2long($x[2]);
-					for($i=$start;$i<=$end;$i++){
-						$_IPs[] = ip2long($i);
-					}
-				}elseif(is_numeric($IP)){
-					$_IPs[] = $IP;
-				}
-			}
-		}
-		return $_IPs;
-	}
-
+# Print results message
+echo html::alert($_type,$_msg,$_icon);
 ?>

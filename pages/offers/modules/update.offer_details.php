@@ -1,8 +1,5 @@
 <?php
-/**
- * Start the Page
- * --------------------------------------------------
- **/
+# Start the Page
 require_once $_SERVER['DOCUMENT_ROOT'].'/_/core.php';
 $X = new X();
 
@@ -12,16 +9,18 @@ $X = new X();
  **/
 if(in_array(@$_REQUEST['act'], ['toggleAuto','toggleActive'])){
 	$id = @$_REQUEST['id'];
-	$sts = 'off';
-	$type = 'danger';
+	$sts = 'Off';
+	$type = 'minus';
+	$bg = 'default txt-color-blueLight';
 	$active = 0;
 	$act = strtolower(str_ireplace('toggle','',$_REQUEST['act']));
-	if(@$_REQUEST['sts'] == 'off'){
-		$sts = 'on';
+	if(trim(@$_REQUEST['sts']) == 'Off'){
+		$sts = 'On';
 		$active = 1;
-		$type = 'success';
+		$type = 'check';
+		$bg = 'success';
 	}
-
+	$sts = '<i class="fa fa-'.$type.'"></i> '.$sts;
 	/**
 	 * query the database
 	 * --------------------------------------------------
@@ -37,6 +36,6 @@ if(in_array(@$_REQUEST['act'], ['toggleAuto','toggleActive'])){
 	 * return result
 	 * --------------------------------------------------
 	 **/
-	echo html::elmt('span','btn btn-'.$type.' btn-xs '.html::Cols(12),$sts);
+	echo html::elmt('span','btn btn-'.$bg.' btn-xs '.html::Cols(12),$sts);
 }
 ?>

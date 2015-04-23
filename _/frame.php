@@ -43,9 +43,12 @@ class html {
 			$CSS[] = '/sa/css/smartadmin.production.css';
 			$CSS[] = '/sa/css/smartadmin.skins.css';
 			$CSS[] = '/incl/styles/404error.less';
+			$CSS[] = '/sa/js/plugin/bootstrap-switch/bootstrap-switch.css';
 			$CSS[] = 'http://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,300,400,700';
-			foreach($CSS as $css)
-				$_[] = html::elmt('link',['rel'=>'stylesheet','href'=>$css])[0];
+			foreach($CSS as $css){
+				$rel = stristr($css,'.less')?'stylesheet/less':'stylesheet';
+				$_[] = html::elmt('link',['rel'=>$rel,'href'=>$css])[0];
+			}
 			$_[] = self::CSS();
 
 			# JS Libraries
@@ -113,7 +116,7 @@ class html {
 	 * @return string html head
 	 * --------------------------------------------------
 	 **/
-	static function OnOffSwitch($id,$title=false,$text=false)
+	static function OnOffSwitch($id,$title=false,$text=false,$checked=false)
 		{
 			$text 	= empty($text)?['YES','NO']:$text;
 			list($on,$off) = $text;
@@ -123,11 +126,11 @@ class html {
 			$toggle[] = html::elmt('span',$p,true);
 			$toggle[] = html::elmt('span','onoffswitch-switch',true);
 			$toggle = html::elmt('label',['class'=>'onoffswitch-label','for'=>$id],$toggle);
-			$input = '<input type="checkbox" id="'.$id.'" name="'.$id.'" class="onoffswitch-checkbox">';
+			$checked = ($checked===false)?'':'checked="checked"';
+			$input = '<input type="checkbox" id="'.$id.'" '.$checked.' name="'.$id.'" class="onoffswitch-checkbox">';
 			if($title)
 				$_[] = html::elmt('label','font-xs',$title);
-			$_[] = html::elmt('span','onoffswitch',$input.$toggle);
-			$_ = implode('',$_);
+			$_ = html::elmt('span','onoffswitch',$input.$toggle);
 			return $_;
 		}
 	/**
@@ -1135,6 +1138,12 @@ class html {
     								'color' => '#E38D13'
     								]
     							]
+    						],
+    					'td#name' 			=> [
+    						'&:hover'		=> [
+    							'cursor' 	=> 'pointer',
+    							'background'=> '#D6DDE7'
+    							]
     						]
     					]
     				]
@@ -1327,7 +1336,10 @@ class html {
 					]
 				];
 			$CSS['div.divMessageBox'] 		= [
-				'background' 				=> 'rgba(0, 0, 0, 0.85)'
+				'background' 				=> 'rgba(0, 0, 0, 0.85)',
+				'*.text-warning' 			=> [
+					'color'					=> '#EB9316'
+					]
 				];
 			return $CSS;
 		}
@@ -1360,6 +1372,8 @@ class html {
 			$JS[] = '/sa/js/plugin/superbox/superbox.min.js';
 			$JS[] = '/sa/js/plugin/morris/morris.min.js';
 			$JS[] = '/sa/js/plugin/morris/raphael.min.js';
+			$JS[] = '/sa/js/plugin/bootstrap-switch/bootstrap-switch.js';
+			$JS[] = '/sa/js/plugin/dropzone/dropzone.min.js';
 			$JS[] = '/sa/js/app.min.js';
 			return $JS;
 		}

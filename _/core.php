@@ -285,6 +285,41 @@ class X {
 			$_ = implode(EOL,$_);
 			return $_;
 		}
+
+	static function parseIPs($IPs)
+		{
+			$_IPs = [];
+			if(!empty($IPs)){
+				$IPs = str_ireplace([" ","\t","\r\n","\n"],',',$IPs);
+				$IPs = explode(',',$IPs);
+				foreach($IPs as $IP){
+					$IP = trim($IP);
+					if(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$IP,$x)){
+						$_IPs[] = ip2long($x[1]);
+					}elseif(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)([0-9]{1,3})\-([0-9]{1,3})$/',$IP,$x)){
+						for($i=$x[2];$i<=$x[3];$i++){
+							$_IPs[] = ip2long($x[1].$i);
+						}
+					}elseif(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\-([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$IP,$x)){
+						$start = ip2long($x[1]);
+						$end = ip2long($x[2]);
+						for($i=$start;$i<=$end;$i++){
+							$_IPs[] = ip2long($i);
+						}
+					}elseif(is_numeric($IP)){
+						$_IPs[] = $IP;
+					}
+				}
+			}
+			return $_IPs;
+		}
+	public function getTargets($domains=false)
+		{
+			$ESPs = new ESPs($this->DB);
+			if($domains)
+				return $ESPs->Tgets_Doms;
+			return $ESPs->Tgets;
+		}
 }
 
 class ESPs {

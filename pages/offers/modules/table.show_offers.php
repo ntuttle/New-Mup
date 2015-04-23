@@ -11,18 +11,19 @@ $Sups = GetActiveSups($X->DB);
 
 # Parse offers array
 foreach($Offers as $id=>$offer){
-    list($a,$b)    = ($offer['on'] == 0)?['danger','off']:['success','on'];
+	$Offers[$id]['name'] = html::elmt('i','font-lg',$offer['name']);
+    list($a,$b)    = ($offer['on'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
     $Offers[$id]['on']   = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
-    list($a,$b)    = ($offer['auto'] == 0)?['danger','off']:['success','on'];
+    list($a,$b)    = ($offer['auto'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
     $Offers[$id]['auto'] = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
-    list($a,$b)    = in_array($offer['sup'],$Sups)?['success','ok']:['warning','expired'];
+    list($a,$b)    = in_array($offer['sup'],$Sups)?['success','<i class="fa fa-check"></i>']:['warning','<i class="fa fa-warning txt-color-red"></i>'];
     $Offers[$id]['sup']  = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
 }
 
 # Make DataTable for offers array
 $ID    = 'OffersTable';
-$DTbl  = "{'pageLength': 30}";
-$TOOLS = ['right'=>[['icon'=>'arrow-circle-right fa-2x','name'=>'id','id'=>'EditOffer']]];
+$DTbl  = "{'pageLength': 25}";
+$TOOLS = false;//['right'=>[['icon'=>'arrow-circle-right fa-2x','name'=>'id','id'=>'EditOffer']]];
 $CLASS = 'table-striped table-bordered table-hover no-footer';
 $T = new TBL($ID,$DTbl);
 $T = $T->Make($Offers,$TOOLS,$CLASS);
@@ -42,8 +43,8 @@ echo html::JS("
 	    var id = td.parent().attr('id');
 	    loadURL('pages/offers/modules/update.offer_details.php?id='+id+'&act=toggleAuto&sts='+sts,td);
 	});
-	$(document).on('click','td.toolbar a#EditOffer',function(){
-		var id = $(this).attr('name');
+	$(document).on('click','td#name',function(){
+		var id = $(this).parent().attr('id');
 		container = $('div#OfferOverview').find('div[role=content]');
 		loadURL('pages/offers/modules/ui.offer_overview.php?id='+id,container);
 	});
@@ -51,16 +52,21 @@ echo html::JS("
 	$(document).on('click','td#sup span.btn',function(){
 	    var td = $(this).parent();
 	    var id = td.parent().attr('id');
-	    $.SmartMessageBox({
-            title: '<i class=\'fa fa-upload txt-color-teal\'></i> Suppression <span class=\'txt-color-teal\'><strong>Update</strong></span>',
-            content: 'The suppression update feature is still under construction!',
-            buttons: '[Ok]'
-        }, function(a) {
-            'Yes' == a && ($.root_.addClass('animated fadeOutUp'), setTimeout(b, 1e3))
-        });
-	    //loadURL('pages/offers/modules/update.offer_suppression.php?id='+id+'&act=toggleAuto&sts='+sts,td);
+		$('#content').append('<article id=\"OfferSuprression'+id+'\"><div role=\"content\"></div></article>');
+		var container = $('article#OfferSuprression'+id);
+	    loadURL('pages/offers/modules/form.offer_suppression.php?id='+id,container);
+
 	});
 ");
+/*
+$.SmartMessageBox({
+    title: '<i class=\'fa fa-warning fa-2x text-warning\'></i> Suppression <span class=\'text-warning\'><strong>Update</strong></span>',
+    content: 'The suppression update feature is still under construction!',
+    buttons: '[Done]'
+}, function(a) {
+    'Yes' == a && ($.root_.addClass('animated fadeOutUp'), setTimeout(b, 1e3))
+});
+*/
 
 
 # Function

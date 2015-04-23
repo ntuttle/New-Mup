@@ -1,90 +1,59 @@
 <?php
-/**
- * Start the Page
- * --------------------------------------------------
- **/
+# Start the Page
 require_once $_SERVER['DOCUMENT_ROOT'].'/_/core.php';
 $X = new X();
 
-/**
- * Check for arguments
- * -----
- **/
+# Check for args
 $DATA = array_map('mysql_real_escape_string',$_REQUEST);
 $POOL = urldecode(@$DATA['pool_search']);
 
-/**
- * retrieve Account details from database
- * --------------------------------------------------
- **/
+# retrieve pool details from database
 $HDT = 'MASTER.ipconfig.pools';
 $W = ['active__>='=>0];
-if(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$POOL,$x)){
+if(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$POOL,$x))
 	$W['id__IN'] = ['SELECT `pool_id` AS `id` FROM `ipconfig`.`pool_ips` WHERE `longip` = '.ip2long($POOL)];
-}else{
+else
 	$W['name__LIKE'] = '%'.$POOL.'%';
-}
-$F = '*';
+$F = ['id','name','active','auto','server_id'];
 $L = 50;
 $Q = $X->DB->GET($HDT,$W,$F,$L);
-
-
 foreach($Q as $i=>$q)
 	$PoolIDs[$i] = $i;
 
-
-/**
- * retrieve Account details from database
- * --------------------------------------------------
- **/
+# retrieve pool ips from database
 $HDT = 'MASTER.ipconfig.pool_ips';
 $W = ['pool_id__IN'=>$PoolIDs,'GROUP'=>'id','ORDER'=>'id'];
 $F = ['COUNT(*)'=>'rows','pool_id'=>'id'];
 $L = 100;
 $PIPs = $X->DB->GET($HDT,$W,$F,$L);
 
+# retrieve pmta ids
+$HDT = 'MASTER.hardware.servers';
+$W = ['type'=>'PMTA'];
+$F = ['id','name'];
+$L = 100;
+$PMTAS = $X->DB->GET($HDT,$W,$F,$L);
 
-// Make Boxes Here
-$class = ['alert','alert-success',html::Cols(12,6,4,3),'no-margin','txt-color-black','padding-5'];
+# Parse pool array
 foreach($Q as $i=>$q){
-	$POOL = $q['name'];
-	$IPCount = number_format(@$PIPs[$i]['rows']);
-	$STATUS = $q['active'];
-	if($STATUS == 0)
-		$class[1] = 'alert-warning';
-	else
-		$class[1] = 'alert-success';
-	$Box = [html::elmt('h6','no-margin font-sm display-inline',$POOL)];
-	$class[2] = html::Cols(12,5,4,3);
-	$Box = [html::elmt('div',['class'=>$class],$Box)];
-
-	$class[1] = 'alert-default';
-	$class[2] = html::Cols(4,3,2,2);
-	$Box[] = html::elmt('div',['class'=>$class],html::elmt('p','font-xs display-inline',$IPCount.' ips'));
-
-	$CHART  = '<span class="sparkline display-inline no-padding no-margin '.html::Cols(12).'" 
-	data-sparkline-type="compositeline" 
-	data-sparkline-barcolor="#aafaaf" 
-	data-sparkline-linecolor="#ed1c24" 
-	data-sparkline-height="25px" 
-	data-sparkline-width="100%" 
-	data-sparkline-line-val="[6,4,7,8,4,3,2,2,5,6,7,4,1,5,7,9,9,8,7,6,6,4,7,8,4,3,2,2,5,6,7,4,1,5,7,9,9,8,7,6]" 
-	data-sparkline-bar-val="[4,1,5,7,9,9,8,7,6,6,4,7,8,4,3,2,2,5,6,7,4,1,5,7,9,9,8,7,6,6,4,7,8,4,3,2,2,5,6,7]"></span>';
-	$Box[] = html::elmt('div','no-padding '.html::Cols(8,4,6,7),$CHART);
-	$Boxes[] = html::elmt('div',['class'=>['hover no-padding',html::Cols(12)]],$Box);
+	$Q[$i]['name']  = html::elmt('i','font-lg',$q['name']);
+	$Q[$i]['server_id'] = @$PMTAS[$q['server_id']]['name'];
+	$Q[$i]['ips']   = number_format(@$PIPs[$i]['rows']);
+	list($a,$b)     = ($q['active'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
+	$Q[$i]['active']= '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
+	list($a,$b)     = ($q['auto'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
+	$Q[$i]['auto']  = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
 }
 
-$div['style'] = 'height:260px;overflow-y:scroll';
-$c = 'no-padding custom-scroll table-responsive ';
-$div['class'] = $c.html::Cols(12);
-$Boxes = html::elmt('div',$div,$Boxes);
-$_P1 = html::elmt('div','no-padding',$Boxes);
+# Make Table for pools
+$_id = 'PoolTable';
+$_dt = false;
+$_data = $Q;
+$_tools = false;
+$_class = 'table-striped table-bordered table-hover no-footer';
+$T = new TBL($_id,$_dt);
+$T = $T->Make($_data,$_tools,$_class);
 
-$_ = $_P1;
-
-$div = ['id'=>'PoolSearchResults','class'=>'row '.html::Cols(12)];
-$_ = html::elmt('div',$div,$_);
-
-html::PrintOut($_);
+html::PrintOut($T);
 echo html::JS("pageSetUp();");
 ?>
