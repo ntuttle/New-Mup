@@ -1,4 +1,5 @@
 {
     "icon": "fa-list-alt",
-    "title": "Logs"
+    "title": "Logs",
+    "url": "#pages/logs/index.php"
 }

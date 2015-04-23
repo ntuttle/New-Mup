@@ -86,5 +86,5 @@ $div = ['id'=>'PoolSearchResults','class'=>'row '.html::Cols(12)];
 $_ = html::elmt('div',$div,$_);
 
 html::PrintOut($_);
-echo html::JS("runAllCharts();");
+echo html::JS("pageSetUp();");
 ?>

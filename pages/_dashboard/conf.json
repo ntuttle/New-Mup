@@ -1,5 +1,5 @@
 {
     "icon": "fa-home",
     "title": "My Dashboard",
-    "link": "#pages/_dashboard/index.php"
+    "url": "#pages/_dashboard/index.php"
 }

@@ -1,4 +1,6 @@
 {
     "icon": "fa-pencil-square",
-    "title": "Offer Creatives"
+    "title": "Offers",
+    "url": "#pages/offers/index.php",
+    "label": "<b class=\"badge font-xs bg-color-teal\" id=\"ActiveOfferCount\"></b>"
 }

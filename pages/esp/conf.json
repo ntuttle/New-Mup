@@ -1,4 +1,5 @@
 {
     "icon": "fa-envelope",
-    "title": "Email Providers"
+    "title": "Email Providers",
+    "url": "#pages/esp/index.php"
 }

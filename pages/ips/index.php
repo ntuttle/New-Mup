@@ -31,7 +31,7 @@ $WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width, $_tools);
  * Print Widgets
  * --------------------------------------------------
  **/
-echo html::elmt('div','row '.html::Cols(12,6,5,4),$WIDGETS);
+$ROW[] = html::elmt('div','row '.html::Cols(12,6,5,4),$WIDGETS);
 $WIDGETS = [];
 
 /**
@@ -63,10 +63,10 @@ $WIDGETS[]  = html::MakeWidget($_id, $_content, $_title, $_width, $_tools, $_arg
  * View IP Ranges Table
  * --------------------------------------------------
  **/
-echo html::elmt('div','row '.html::Cols(12,6,7,8),$WIDGETS);
-echo html::JS("$('i.toggleDTblTools').bind('click',function(){
-	$(this).parent().parent().parent().find('div.dt-toolbar').toggle('slow');
-});
+$ROW[] = html::elmt('div','row '.html::Cols(12,6,7,8),$WIDGETS);
+echo implode(EOL,$ROW);
+echo html::JS("
+pageSetUp();
 $('i#PoolSearch').bind('click',function(){
 	var pool = $('input#pool_search').val();
 	var container = $('div#IPPools').find('div[role=content]');

@@ -7,6 +7,7 @@ require_once DIR.'/_/sql.php';
 require_once DIR.'/_/frame.php';
 require_once DIR.'/_/table.php';
 require_once DIR.'/_/form.php';
+require_once DIR.'/sa/lib/config.php';
 
 
 class X {
@@ -20,23 +21,46 @@ class X {
 			$this->CheckUser();
 			$this->MakeResponse();
 		}
+	/**
+	 * DB_Connect ( $title )
+	 * --------------------------------------------------
+	 * returns the html head of the parent document
+	 * --------------------------------------------------
+	 **/
 	public function DB_Connect()
 		{
 			$DB = new DB('MASTER',MASTER,USER,PASS);
 			if(empty($DB))
 				$this->Quit('No Database Connection Available!');
 			$DB->C('ZAP',ZAP,ZAP_USER,ZAP_PASS);
-			$DB->C('SEEDS',SEEDS,USER,PASS);
+			$DB->C('EMAILS',EMAILS,USER,PASS);
 			$DB->C('LOGS',LOGS,USER,PASS);
 			$DB->C('ACTIONS',ACTIONS,USER,PASS);
 			$this->DB = $DB;
 		}
+	/**
+	 * Quit ( $msg )
+	 * --------------------------------------------------
+	 * Stop the script nicely with a message
+	 * --------------------------------------------------
+	 * @param string $msg Message to display
+	 * --------------------------------------------------
+	 **/
 	public function Quit($msg)
 		{
 			$_[] = '<span class="alert alert-danger">'.$msg.'</span>';
 			$_ = implode(EOL,$_);
 			exit($_);
 		}
+	/**
+	 * X::CreateUserDir( $id )
+	 * --------------------------------------------------
+	 * Checks that the user directory exists for docs and 
+	 * profile settings
+	 * --------------------------------------------------
+	 * @param int $id the user id
+	 * --------------------------------------------------
+	 **/
 	public function CreateUserDir($id)
 		{
 			$UserDir = DIR.'/data/users/'.$id.'/';
@@ -50,6 +74,14 @@ class X {
 				copy(DIR.'/data/users/0/default.png',$UserDir.'_profile/default.png');
 			}
 		}
+	/**
+	 * X::CheckUser( void )
+	 * --------------------------------------------------
+	 * check that the user is logged in or that a login
+	 * request is valid, otherwise stop script and display
+	 * the login page to the use
+	 * --------------------------------------------------
+	 **/
 	public function CheckUser()
 		{
 			if(!empty($_REQUEST['u']) && !empty($_REQUEST['p'])){
@@ -67,13 +99,13 @@ class X {
 						$this->CreateUserDir($i);
 					}
 				}else{
-					echo html::Head('Invalid Login Attempt');
-					echo $this->Login();
+					echo html::Head('Login');
+					echo $this->Login('Invalid Login Attempt');
 					exit();
 				}
 			}elseif(empty($_COOKIE['mup_user_name']) || empty($_COOKIE['mup_user']) || empty($_COOKIE['mup_user_id']) || empty($_COOKIE['mup_user_phone'])){
 				echo html::Head('Login');
-				echo $this->Login();
+				echo $this->Login('Please log in!','warning');
 				exit();
 			}else{
 				$W['id'] = $_COOKIE['mup_user_id'];
@@ -88,21 +120,60 @@ class X {
 				setcookie('mup_user_id',false,time()-3600);
 				setcookie('mup_user_name',false,time()-3600);
 				echo html::Head('Login');
-				echo $this->Login();
+				echo $this->Login('<strong>Wait! Who are you?</strong> Please log in again...','danger');
 				exit();
 			}
 			return true;
 		}
-	public function Login()
+	
+	/**
+	 * Head ( $title )
+	 * --------------------------------------------------
+	 * returns the html head of the parent document
+	 * --------------------------------------------------
+	 * @param string $title Title of the document
+	 * @return string html head
+	 * --------------------------------------------------
+	 **/
+	public function Login($MSG=false,$msg_type='danger')
 		{
-			$F = new FORMS('Login','User Login',html::Cols([2=>8],[3=>6],[4=>4],[4=>4]));
-			$F->Text('u',['username'=>false],false,html::Cols(12));
-			$F->Text('p',['password'=>false],false,html::Cols(12));
-			$F->Submit('Submit','Submit','btn btn-primary '.html::Cols(2).' pull-right');
-			$F = $F->PrintForm();
-			$F = '<div class="row"><br><br><br>'.$F.'</div>';
-			return $F;
+			# Set some variables
+			$_id 		= 'Login';
+			$_title 	= 'User Login';
+			$_width 	= html::Cols([1=>10],[2=>8],[3=>6],[4=>4]);
+			$_tools  	= false;
+			$_args 		= ['article'=>['style'=>'margin-top:100px;']];
+
+			# Make the login form
+			$F = new FORMS($_id);
+			if($MSG)
+				$F->Write(html::alert($msg_type,$MSG));
+			$F->Write('<div class="row">');
+			$F->Text('u',['username'=>false],false);
+			$F->Text('p',['password'=>false],false);
+			$F->Write('</div>');
+			$F->Write('<footer>');
+			$F->Submit('login','LOGIN','btn btn-warning btn-xs font-xs pull-right');
+			$F->Write('</footer>');
+			$LoginForm = html::elmt('div','row',$F->PrintForm());
+
+			# Make the widget containing the login form
+			$WIDGET     = html::MakeWidget($_id, $LoginForm, $_title, $_width, $_tools, $_args);
+
+			# Return the form html
+			$_ = html::MakeHTML($WIDGET,'Login','minified');
+			return $_;
 		}
+	
+	/**
+	 * Head ( $title )
+	 * --------------------------------------------------
+	 * returns the html head of the parent document
+	 * --------------------------------------------------
+	 * @param string $title Title of the document
+	 * @return string html head
+	 * --------------------------------------------------
+	 **/
 	public function MakeResponse()
 		{
 			if(!empty($_REQUEST['AJAX'])){
@@ -111,6 +182,16 @@ class X {
 				
 			}
 		}
+	
+	/**
+	 * Head ( $title )
+	 * --------------------------------------------------
+	 * returns the html head of the parent document
+	 * --------------------------------------------------
+	 * @param string $title Title of the document
+	 * @return string html head
+	 * --------------------------------------------------
+	 **/
 	public function User_Notify()
 		{
 			$_[] = '<ul class="notification-body">';

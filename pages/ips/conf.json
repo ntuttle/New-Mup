@@ -1,4 +1,6 @@
 {
     "icon": "fa-laptop",
-    "title": "IPs"
+    "title": "IP Manager",
+    "url": "#pages/ips/index.php",
+    "label": "<b class=\"badge font-xs bg-color-teal\" id=\"ActiveIPsCount\"></b>"
 }

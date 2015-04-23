@@ -1,4 +1,6 @@
 {
     "icon": "fa-list",
-    "title": "Email Lists"
+    "title": "Email Lists",
+    "url": "#pages/lists/index.php",
+    "label": "<b class=\"badge font-xs bg-color-blue\" id=\"ActiveListsCount\"><small><i class=\"fa fa-spinner fa-spin\"></i></small></b>"
 }

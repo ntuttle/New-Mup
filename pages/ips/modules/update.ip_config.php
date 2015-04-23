@@ -22,7 +22,6 @@ $_msg_rate = $DATA['msg_rate'];
 $_msg_con = $DATA['msg_con'];
 $_con_rate = $DATA['con_rate'];
 $_reload = ($DATA['reload'] == 'on')?true:false;
-
 if(!empty($_ips)){
 
 	if(!empty($_msg_rate) || ($_msg_rate == '0'))
@@ -35,6 +34,7 @@ if(!empty($_ips)){
 		$S['mailing'] = $_mailing;
 	if(!empty($_content) || ($_content == '0'))
 		$S['content'] = $_content;
+	$S['active'] = ($_active == 'no')?0:1;
 	
 
 	$HDT 	= 'MASTER.ipconfig.target_config';

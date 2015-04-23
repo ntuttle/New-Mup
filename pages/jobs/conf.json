@@ -1,4 +1,5 @@
 {
     "icon": "fa-briefcase",
-    "title": "Jobs"
+    "title": "Jobs",
+    "url": "#pages/jobs/index.php"
 }
