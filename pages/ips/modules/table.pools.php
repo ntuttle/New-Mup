@@ -14,7 +14,8 @@ if(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$POOL,$x))
 	$W['id__IN'] = ['SELECT `pool_id` AS `id` FROM `ipconfig`.`pool_ips` WHERE `longip` = '.ip2long($POOL)];
 else
 	$W['name__LIKE'] = '%'.$POOL.'%';
-$F = ['id','name','active','auto','server_id'];
+$W['ORDER'] = ['id'=>'DESC'];
+$F = ['id','name','active'=>'on','auto','server_id'];
 $L = 50;
 $Q = $X->DB->GET($HDT,$W,$F,$L);
 foreach($Q as $i=>$q)
@@ -36,18 +37,18 @@ $PMTAS = $X->DB->GET($HDT,$W,$F,$L);
 
 # Parse pool array
 foreach($Q as $i=>$q){
-	$Q[$i]['name']  = html::elmt('i','font-lg',$q['name']);
+	$Q[$i]['name']  = html::elmt('i','font-md',$q['name']);
 	$Q[$i]['server_id'] = @$PMTAS[$q['server_id']]['name'];
 	$Q[$i]['ips']   = number_format(@$PIPs[$i]['rows']);
-	list($a,$b)     = ($q['active'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
-	$Q[$i]['active']= '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
-	list($a,$b)     = ($q['auto'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
-	$Q[$i]['auto']  = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
+    list($a,$b,$c)  = ($q['on'] == 0)?['default txt-color-blueLight','minus','Off']:['success','check','On'];
+    $Q[$i]['on']  	= html::elmt('span','btn btn-xs font-xs btn-'.$a,html::elmt('i','fa fa-'.$b,true).$c);
+    list($a,$b,$c)  = ($q['auto'] == 0)?['default txt-color-blueLight','minus','Off']:['success','check','On'];
+	$Q[$i]['auto']  = html::elmt('span','btn btn-xs font-xs btn-'.$a,html::elmt('i','fa fa-'.$b,true).$c);
 }
 
 # Make Table for pools
 $_id = 'PoolTable';
-$_dt = false;
+$_dt = true;
 $_data = $Q;
 $_tools = false;
 $_class = 'table-striped table-bordered table-hover no-footer';

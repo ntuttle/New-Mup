@@ -1,30 +1,17 @@
 <?php
-
 class html {
-
-	private static $user = false;
-
-	static function SetUser($user)
-		{
-			html::$user = $user;
-		}
 	/**
 	 * Head ( $title )
 	 * --------------------------------------------------
 	 * returns the html head of the parent document
 	 * --------------------------------------------------
 	 * @param string $title Title of the document
-	 * @return string html head
 	 * --------------------------------------------------
 	 **/
 	static function Head($title)
 		{
 			$_[] = '<head>';
 			$_[] = '<title>MEDIA universal | '.$title.'</title>';
-			
-			# META tags
-			#-------------------------
-			$_[] = '';
 			# viewport
 			$vp['width']  = 'device-width';
 			$vp['height'] = 'device-height';
@@ -34,9 +21,7 @@ class html {
 			$vp['user-scalable'] = 'yes';
 			$vp['target-densitydpi']= 'device-dpi';
 			$_[] = '<meta name="viewport" content="'.http_build_query($vp,'',',').'" />';
-
 			# CSS styles
-			#-------------------------
 			$CSS[] = '//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css';
 			$CSS[] = '//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css';
 			$CSS[] = '//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css';
@@ -50,9 +35,7 @@ class html {
 				$_[] = html::elmt('link',['rel'=>$rel,'href'=>$css])[0];
 			}
 			$_[] = self::CSS();
-
 			# JS Libraries
-			#-------------------------
 			$JS[] = '//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js';
 			$JS[] = '//ajax.googleapis.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js';
 			$JS[] = '//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js';
@@ -60,60 +43,57 @@ class html {
 			$JS[] = '//cdnjs.cloudflare.com/ajax/libs/less.js/2.5.0/less.min.js';
 			foreach($JS as $js)
 				$_[] = html::JS($js);
-
 			$_[] = '</head>';
 			$_ = implode('',$_);
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * ModalBtn ( $id, $url, $text, $icon, $class )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * create button that opens a url into a modal popup box
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * @return string html head
+	 * @param string $id button identifier
+	 * @param string $url path to open to modal
+	 * @param string $text button text
+	 * @param string $icon button icon
+	 * @param string $class button class
 	 * --------------------------------------------------
 	 **/
-	static function ModalBtn($url,$id,$text=false,$icon=false,$class=false)
+	static function ModalBtn($id,$url,$text,$icon=false,$class='btn-warning')
 		{
-			$_['href'] = $url;
-			$_['data-toggle'] = 'modal';
-			$_['data-target'] = '#'.$id;
-			$_['class'] = $class;
-
-			if(!empty($icon))
-				$I = html::elmt('i','fa fa-'.$icon,"&nbsp;");
-			$BTN = html::elmt('a',$_,@$I.$text);
-			return $BTN;
+			$icon = empty($icon)?false:html::elmt('i','fa '.$icon,true);
+			$text = html::elmt('button',['href'=>'#'.$url.'&modal=true','class'=>'ModalBtn btn btn-xs '.$class],$icon.$text);
+			return $text;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * ModalHTML ( $content, $header )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Wrap content in modal styled html tags
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * @return string html head
+	 * @param string $content modal content
+	 * @param string $header modal header
 	 * --------------------------------------------------
 	 **/
 	static function ModalHTML($content,$header=true)
 		{
-			$H[] = html::elmt('button',['class'=>'close','type'=>'button','data-dismiss'=>'modal','aria-hidden'=>'true'],'&times;');
-			$H[] = html::elmt('b','font-lg',$header);
-			$_[] = html::elmt('div','modal-header',implode('',$H));
+			if(!empty($header)){
+				$H[] = html::elmt('button',['class'=>'close','type'=>'button','data-dismiss'=>'modal','aria-hidden'=>'true'],'&times;');
+				$H[] = html::elmt('b','font-lg',$header);
+				$_[] = html::elmt('div','modal-header',implode('',$H));
+			}
 			$_[] = html::elmt('div','modal-body',$content);
 			$_ = implode('',$_);
 			return $_;
 		}
 	/**
-	 * Error404 ( $x [, $y [, $z]] )
+	 * OnOffSwitch ( $id, $title, $text, $checked )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * create styled on/off switch
 	 * --------------------------------------------------
-	 * @return string html head
+	 * @param string $id checkbox identifier
+	 * @param string $title checkbox title
+	 * @param array $text on/off switch text (default) is [ON=>OFF]
+	 * @param boolean $checked state of the checkbox
 	 * --------------------------------------------------
 	 **/
 	static function OnOffSwitch($id,$title=false,$text=false,$checked=false)
@@ -130,42 +110,40 @@ class html {
 			$input = '<input type="checkbox" id="'.$id.'" '.$checked.' name="'.$id.'" class="onoffswitch-checkbox">';
 			if($title)
 				$_[] = html::elmt('label','font-xs',$title);
-			$_ = html::elmt('span','onoffswitch',$input.$toggle);
+			$_[] = html::elmt('span','onoffswitch',$input.$toggle);
+			$_ = implode('',$_);
 			return $_;
 		}
 	/**
-	 * Error404 ( $x [, $y [, $z]] )
+	 * PrintOut ( $content, $header )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * display page and launch page libraries
 	 * --------------------------------------------------
 	 **/
-	static function PrintOut($content,$header=false)
+	static function PrintOut($c,$h=false)
 		{
-			if(is_array($content))
-				$content = implode('',$content);
+			if(is_array($c))
+				$c = implode('',$c);
 			if(isset($_REQUEST['modal']))
-				$content = html::ModalHTML($content,$header);
-			echo $content;
+				$c = html::ModalHTML($c,$h);
+			echo $c;
+			echo html::JS("pageSetUp();");
 		}
 	/**
-	 * Error404 ( $x [, $y [, $z]] )
+	 * Error404 ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * Styles error page
 	 * --------------------------------------------------
 	 **/
 	static function Error404()
 		{
 			$_[] = '<div class="row col-xs-12 col-sm-12 col-md-12 col-lg-12">';
 			$_[] = '<div class="text-center error-box">';
-				$_[] = '<br /><br /><br />';
-				$_[] = '<h1 class="error-text-2 bounceInDown animated"> Oops! <span class="particle particle--c"></span><span class="particle particle--a"></span><span class="particle particle--b"></span></h1>';
-				$_[] = '<h2 class="font-xl"><strong><i class="fa fa-fw fa-warning fa-lg text-warning"></i> this page is under construction</strong></h2>';
-				$_[] = '<br /><br /><br />';
-				$_[] = '<p class="lead">The page you requested could not be displayed, either contact your webmaster or try again later. Use your browsers <b>Back</b> button to navigate to the page you have prevously come from</p>';
+			$_[] = '<br /><br /><br />';
+			$_[] = '<h1 class="error-text-2 bounceInDown animated"> Oops! <span class="particle particle--c"></span><span class="particle particle--a"></span><span class="particle particle--b"></span></h1>';
+			$_[] = '<h2 class="font-xl"><strong><i class="fa fa-fw fa-warning fa-lg text-warning"></i> this page is under construction</strong></h2>';
+			$_[] = '<br /><br /><br />';
+			$_[] = '<p class="lead">The page you requested could not be displayed, either contact your webmaster or try again later. Use your browsers <b>Back</b> button to navigate to the page you have prevously come from</p>';
 			$_[] = '</div>';
 			$_[] = '</div>';
 			$_[] = '';
@@ -173,11 +151,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * Start ( $x [, $y [, $z]] )
+	 * Start ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * HTML Start
 	 * --------------------------------------------------
 	 **/
 	static function Start()
@@ -188,15 +164,14 @@ class html {
 			return $_;
 		}
 	/**
-	 * alert ( $x [, $y [, $z]] )
+	 * alert ( $type, $msg, $i, $c )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * html alert box
 	 * --------------------------------------------------
 	 * @param string $type Type of alert box
 	 * @param string $msg Message to alert
 	 * @param mixed $i Icon to display
 	 * @param mixed $c extra class(es) to  add to alert box
-	 * @return string HTML alert box
 	 * --------------------------------------------------
 	 **/
 	static function alert($type,$msg,$i=true,$c=false)
@@ -208,11 +183,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * Error404 ( $x [, $y [, $z]] )
+	 * Body ( $content, $class )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * Create classed body
 	 * --------------------------------------------------
 	 **/
 	static function Body($content, $class=false)
@@ -221,7 +194,7 @@ class html {
 			$Content = self::elmt('div',['id'=>'content'],$content);
 			$Theme   = empty($_COOKIE['mup_webtheme'])?1:$_COOKIE['mup_webtheme'];
 			$MinNav  = empty($_COOKIE['mup_minifynav'])?false:true;
-
+			$Modal   = self::PopupModal('Modal');
 			$Class[] = 'fixed-header';
 			$Class[] = 'fixed-navigation';
 			$Class[] = 'smart-style-'.$Theme;
@@ -229,36 +202,31 @@ class html {
 				$Class[] = 'minified';
 			if($class)
 				$Class[] = is_array($class)?implode(' ',$class):$class;
-			
 			$_[] = self::Header();
 			$_[] = self::ShortCuts();
 			$_[] = self::NavBar();
-			$_[] = self::elmt('div',['id'=>'main','role'=>'main'],$Ribbon.$Content);
+			$_[] = self::elmt('div',['id'=>'main','role'=>'main'],$Ribbon.$Content.$Modal);
 			$_[] = self::Footer();
 			$_ = html::elmt('body',['class'=>$Class],$_);
 			return $_;
 		}
 	/**
-	 * Ribbon ( $x [, $y [, $z]] )
+	 * Ribbon ( )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Page breadcrumbs
+	 * (temporarily disabled!)
 	 * --------------------------------------------------
 	 **/
 	static function Ribbon()
 		{
-
-			# Temporary
 			return false;
-
 			$_ = html::elmt('div',['id'=>'ribbon','class'=>'hidden-xs hidden-sm'],html::elmt('ol','breadcrumb','<li>Home</li>'));
 			return $_;
 		}
 	/**
-	 * Footer ( $x [, $y [, $z]] )
+	 * Footer ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * HTML Footer
 	 * --------------------------------------------------
 	 **/
 	static function Footer()
@@ -273,12 +241,11 @@ class html {
 			return $_;
 		}
 	/**
-	 * printServerStatusDetails ( $x [, $y [, $z]] )
+	 * printServerStatusDetails ( $status )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * display server status via memcached @see self::ServerStatus()
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @return string html head
+	 * @param array $status server status
 	 * --------------------------------------------------
 	 **/
 	static function printServerStatusDetails($status)
@@ -312,11 +279,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * ServerStatus ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * display server status via memcached
 	 * --------------------------------------------------
 	 **/
 	static function ServerStatus()
@@ -338,16 +303,13 @@ class html {
 
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * End ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * close html content with additional js libs
 	 * --------------------------------------------------
 	 **/
 	static function End()
 		{
-			// be sure jquery is loaded
 			$_[] = '<script>if (!window.jQuery) { document.write(\'<script src="http://sa/js/libs/jquery-2.0.2.min.js"><\/script>\'); }</script>';
 			$_[] = '<script>if (!window.jQuery.ui) { document.write(\'<script src="http://sa/js/libs/jquery-ui-1.10.3.min.js"><\/script>\'); }</script>';
 			foreach(self::JSLibs() as $js)
@@ -359,12 +321,11 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * PopupModal ( $id )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Popup modal box
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @return string html head
+	 * @param string $id modal id
 	 * --------------------------------------------------
 	 **/
 	static function PopupModal($id)
@@ -380,13 +341,13 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * MakeHTML ( $content, $title, $class )
 	 * --------------------------------------------------
 	 * Description of function here
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @return string html head
+	 * @param string $content HTML Content
+	 * @param string $title document title
+	 * @param string $class body class
 	 * --------------------------------------------------
 	 **/
 	static function MakeHTML($content,$title=false,$class=false)
@@ -399,11 +360,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * UserDetails ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * User details above navbar
 	 * --------------------------------------------------
 	 **/
 	static function UserDetails()
@@ -411,7 +370,6 @@ class html {
 			$_[] = '<div class="login-info">';
 			$_[] = '<span>';
 			$_[] = '<a href="javascript:void(0);" id="show-shortcut" data-action="toggleShortcut">';
-
 			$IMG = '/data/users/'.$_COOKIE['mup_user_id'].'/_profile/default.';
 			$ext = file_exists(DIR.$IMG.'jpg')?'jpg':'png';
 			$_[] = '<img src="'.$IMG.$ext.'" alt="me" class="online">';
@@ -424,18 +382,17 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * GetDirectoryNav ( $DIR )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Build navigation array from pages directory
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @return string html head
+	 * @param string $DIR directory to parse
 	 * --------------------------------------------------
 	 **/
 	static function GetDirectoryNav($DIR)
 		{
 			$DH = opendir($DIR);
-			while(($FN = readdir($DH)) !== false){
+			while(($FN = readdir($DH)) !== false)
 				if(preg_match('/^([0-9a-zA-Z\-_]{3,})$/',$FN,$x)){
 					$SDH = opendir($DIR.$x[0]);
 					$conf = false;
@@ -445,17 +402,14 @@ class html {
 						foreach($conf as $k=>$v)
 							$NAV[$x[1]][$k] = $v;
 					}
-					while(($SFN = readdir($SDH)) !== false){
-						if(preg_match('/^([0-9a-zA-Z\-_\.]+)\.php$/',$SFN,$y)){
+					while(($SFN = readdir($SDH)) !== false)
+						if(preg_match('/^([0-9a-zA-Z\-_\.]+)\.php$/',$SFN,$y))
 							if($y[1]!='index')
 								$NAV[$x[1]]['sub'][$y[1]] = $x[1].'/'.$y[0];
-						}
-					}
 					if(!empty($NAV[$x[1]]))
 						ksort($NAV[$x[1]]);
 					closedir($SDH);
 				}
-			}
 			closedir($DH);
 			ksort($NAV);
 			return $NAV;
@@ -468,27 +422,22 @@ class html {
 	 * --------------------------------------------------
 	 * 
 	 * To edit the navigation:
-	 * -------------------------
+	 * ==============================
 	 * 1) open the page config file 
 	 *        - #pages/[pagename]/conf.json
 	 * 2) make the changes and save the file! :)
 	 * 
+	 * 
 	 * conf.json reference
-	 * -------------------------
+	 * ==============================
 	 * url:		page to navigate to. a # prefix will load 
 	 * 			contents into the body container 
 	 * 			ei: #pages/pageName.php
-	 * 
 	 * url_target: _blank (optional)
-	 * 
 	 * title:  	the navbar text to display on the website
-	 * 
 	 * icon: 	fa icon to display
-	 * 
 	 * label: 	custom html to show on the right on the navbar
 	 * 
-	 * --------------------------------------------------
-	 * @return string html head
 	 * --------------------------------------------------
 	 **/
 	static function NavBar()
@@ -496,19 +445,15 @@ class html {
 			if(!empty($_COOKIE['mup_user_id'])){
 				$page = 'pages';
 				$NAV = self::GetDirectoryNav('./'.$page.'/');
-
 				$USER = self::UserDetails();
 				unset($NAV['dashboard']);
 				foreach($NAV as $parent=>$links){
 					$_[] = '<li>';
 					if(is_array($links)){
-
-						// Set Main Parts
 						$title = empty($links['title'])?ucwords(str_ireplace('_',' ',$parent)):$links['title'];
 						$href = empty($links['url'])?'#':$links['url'];
 						$icon = empty($links['icon'])?false:html::elmt('i','fa fa-lg fa-fw '.$links['icon'],true);
 						$label = empty($links['label'])?false:$links['label'];
-
 						$_[] = '<a href="'.$href.'" title="'.$title.'">';
 						if(!empty($icon)){$_[] = $icon;}
 						$_[] = ' <span class="menu-item-parent">'.$title.'</span>';
@@ -518,13 +463,6 @@ class html {
 							$_[] = '<ul>';
 							foreach($links['sub'] as $sub=>$link){
 								$_[] = '<li>';
-
-								// Set Main Parts
-								// $icon  = ???;
-								// $label = ???;
-								// $href  = ???;
-								// $title = ???;
-								
 								$_[] = '<a href="'.$page.'/'.$link.'" title="'.ucfirst($sub).'"><span class="menu-item-parent">'.ucwords(str_ireplace('_',' ',$sub)).'</span></a>';
 								$_[] = '</li>';
 							}
@@ -534,18 +472,10 @@ class html {
 						$_[] = '<a href="'.$page.'/'.$links.'" title="'.ucfirst($parent).'"><span class="menu-item-parent">'.ucwords(str_ireplace('_',' ',$parent)).'</span></a>';
 					$_[] = '</li>';
 				}
-
-				// <ul>
 				$UL = html::elmt('ul',false,$_);
-
-				// <nav>
 				$NAV = html::elmt('nav',false,$UL);
-
-				// <span class="minifyme" ...
 				$MINIFY = html::elmt('span',['class'=>'minifyme','data-action'=>'minifyMenu'],html::elmt('i','fa fa-arrow-circle-left hit',true));
 				$NAV   .= $MINIFY;
-
-				// <aside>
 				$ASIDE 	= html::elmt('aside',['id'=>'left-panel'],$USER.$NAV);
 				return $ASIDE;
 			}
@@ -553,36 +483,32 @@ class html {
 			return $ASIDE;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * ShortCuts ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * User Shortcutes
 	 * --------------------------------------------------
 	 **/
 	static function ShortCuts()
 		{
-
 			$_[] = '<div id="shortcut">';
 			$_[] = '<ul>';
-				$_[] = '<li><a href="#ajax/settings.php" class="jarvismetro-tile big-cubes bg-color-blue"> <span class="iconbox"> <i class="fa fa-envelope fa-4x"></i> <span>Mail <span class="label pull-right bg-color-darken">14</span></span> </span> </a></li>';
-				$_[] = '<li><a href="#ajax/calendar.php" class="jarvismetro-tile big-cubes bg-color-orangeDark"> <span class="iconbox"> <i class="fa fa-calendar fa-4x"></i> <span>Calendar</span> </span> </a></li>';
-				$_[] = '<li><a href="#ajax/gmap-xml.php" class="jarvismetro-tile big-cubes bg-color-purple"> <span class="iconbox"> <i class="fa fa-map-marker fa-4x"></i> <span>Maps</span> </span> </a></li>';
-				$_[] = '<li><a href="#ajax/invoice.php" class="jarvismetro-tile big-cubes bg-color-blueDark"> <span class="iconbox"> <i class="fa fa-book fa-4x"></i> <span>Invoice <span class="label pull-right bg-color-darken">99</span></span> </span> </a></li>';
-				$_[] = '<li><a href="#ajax/gallery.php" class="jarvismetro-tile big-cubes bg-color-greenLight"> <span class="iconbox"> <i class="fa fa-picture-o fa-4x"></i> <span>Gallery </span> </span> </a></li>';
-				$_[] = '<li><a href="#ajax/profile.php" class="jarvismetro-tile big-cubes selected bg-color-pinkDark"> <span class="iconbox"> <i class="fa fa-user fa-4x"></i> <span>My Profile </span> </span> </a></li>';
+			$_[] = '<li><a href="#ajax/settings.php" class="jarvismetro-tile big-cubes bg-color-blue"> <span class="iconbox"> <i class="fa fa-envelope fa-4x"></i> <span>Mail <span class="label pull-right bg-color-darken">14</span></span> </span> </a></li>';
+			$_[] = '<li><a href="#ajax/calendar.php" class="jarvismetro-tile big-cubes bg-color-orangeDark"> <span class="iconbox"> <i class="fa fa-calendar fa-4x"></i> <span>Calendar</span> </span> </a></li>';
+			$_[] = '<li><a href="#ajax/gmap-xml.php" class="jarvismetro-tile big-cubes bg-color-purple"> <span class="iconbox"> <i class="fa fa-map-marker fa-4x"></i> <span>Maps</span> </span> </a></li>';
+			$_[] = '<li><a href="#ajax/invoice.php" class="jarvismetro-tile big-cubes bg-color-blueDark"> <span class="iconbox"> <i class="fa fa-book fa-4x"></i> <span>Invoice <span class="label pull-right bg-color-darken">99</span></span> </span> </a></li>';
+			$_[] = '<li><a href="#ajax/gallery.php" class="jarvismetro-tile big-cubes bg-color-greenLight"> <span class="iconbox"> <i class="fa fa-picture-o fa-4x"></i> <span>Gallery </span> </span> </a></li>';
+			$_[] = '<li><a href="#ajax/profile.php" class="jarvismetro-tile big-cubes selected bg-color-pinkDark"> <span class="iconbox"> <i class="fa fa-user fa-4x"></i> <span>My Profile </span> </span> </a></li>';
 			$_[] = '</ul>';
 			$_[] = '</div>';
 			$_ = implode('',$_);
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * JS ( $JS )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * javascript snippet
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @return string html head
+	 * @param string $JS javascript
 	 * --------------------------------------------------
 	 **/
 	static function JS($JS)
@@ -600,11 +526,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * CSS ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * CSS Styles for html head
 	 * --------------------------------------------------
 	 **/
 	static function CSS()
@@ -619,25 +543,23 @@ class html {
 			return $_;	
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * attr ( $attr, $vals )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * turn attribute array into string
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @return string html head
+	 * @param string $attr attribute
+	 * @param mixed $vals attribute values
 	 * --------------------------------------------------
 	 **/
 	static function attr($attr,$vals=false)
 		{
 			$_ = [];
 			if(empty($vals) && is_array($attr)){
-				foreach($attr as $k=>$v){
+				foreach($attr as $k=>$v)
 					if(!empty($v)){
 						$v = is_array($v)?$v:[$v];
 						$_[] = $k.'="'.implode(' ',$v).'"';
 					}
-				}
 			}else{
 				$vals = is_array($vals)?$vals:[$vals];
 				$_[] = $attr.'="'.implode(' ',$vals).'"';
@@ -646,14 +568,13 @@ class html {
 			return $_;	
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * elmt ( $el, $attr, $content )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * create html element
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * @return string html head
+	 * @param string $el Element name
+	 * @param mixed $attr class or array of attribute=>[values]
+	 * @param string $content element content
 	 * --------------------------------------------------
 	 **/
 	static function elmt($el,$attr=false,$content=false)
@@ -661,30 +582,27 @@ class html {
 			$_[] = '<'.$el;
 			if(!empty($attr)){
 				$attr = is_array($attr)?html::attr($attr):$attr;
-				if(!stristr($attr,'=')){
+				if(!stristr($attr,'='))
 					$attr = html::attr('class',$attr);
-				}
 				$_[] = ' '.$attr;
 			}
 			$_[] = '>';
 			$le = '</'.$el.'>';
 			$el = implode('',$_);
 			$content = ($content===true)?'':$content;
-			if($content === false){
+			if($content === false)
 				return [$el,$le];
-			}
 			if(is_array($content))
 				$content = implode('',$content);
 			return $el.$content.$le;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * SuperBox ( $IMGs, $id )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Create image thumbnail icons
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @return string html head
+	 * @param array $IMGs array of images
+	 * @param string $id container id
 	 * --------------------------------------------------
 	 **/
 	static function SuperBox($IMGs,$id)
@@ -702,31 +620,31 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * pageLoad ( $url, $container )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Load a page to a container after the page loads
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @return string html head
+	 * @param string $url url to load
+	 * @param string $container element to load url results
 	 * --------------------------------------------------
 	 **/
 	static function pageLoad($url,$container)
 		{
-			$JS = "var container = $('div#{$container}').find('div[role=content]');
-				loadURL('{$url}',container);
-				";
+			$JS = "var container = $('div#{$container}').find('div[role=content]');loadURL('{$url}',container);";
 			$_ = html::JS($JS);
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * MakeWidget ( $id, $content, $header, $width, $tools, $args )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Create formatted html widget
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $id widget identifier
+	 * @param string $content widget content
+	 * @param string $header widget header
+	 * @param string $width widget width
+	 * @param array $tools widget-toolbar
+	 * @param array $args widget element classes
 	 * @return string html head
 	 * --------------------------------------------------
 	 **/
@@ -740,72 +658,61 @@ class html {
 			$O['content']['role'] = 'content';
 			$O['header']['role'] = 'heading';
 			$O['article']['class'] .= ' animated bounceInUp fast';
-
 			if(!empty($args)){
 				$args = is_array($args)?$args:[$args];
-				foreach($args as $arg=>$val){
-					if(is_array($val)){
-						foreach($val as $k=>$v){
+				foreach($args as $arg=>$val)
+					if(is_array($val))
+						foreach($val as $k=>$v)
 							$O[$arg][$k] = $v;
-						}
-					}else{
+					else
 						$O[$arg] = $val;
-					}
-				}
 			}
-
-
 			if($header)
 				$h2 = html::elmt('h2',false,$header);
-			if(!empty($tools))
-				$tools = html::elmt('div',['class'=>['widget-toolbar','smart-form'],'role'=>'menu'],$tools);
+			if(empty($tools))
+				$tools=true;
+			$tools = html::elmt('div',['class'=>['widget-toolbar','smart-form'],'role'=>'menu'],$tools);
 			$header = html::elmt('header',@$O['header'],$h2.@$tools);
 			$content = html::elmt('div',$O['content'],$content);
 			$_ = html::elmt('article',$O['article'],html::elmt('div',@$O['div'],$header.$content));
 			return $_;	
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * printCSSStyles ( $CSS, $t )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Turn css array into formatted css styles
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @return string html head
+	 * @param array $CSS css styles
+	 * @param mixed $t tab (optional)
 	 * --------------------------------------------------
 	 **/
 	static function printCSSStyles($CSS,$t=false)
 		{
 			if(is_array($CSS)){
 				ksort($CSS);
-				foreach($CSS as $K=>$V){
+				foreach($CSS as $K=>$V)
 					if(is_array($V)){
 						$_[] = $t.$K." {";
-						//$_[] = self::printCSSStyles($V,$t."\t");
 						$_[] = self::printCSSStyles($V);
 						$_[] = $t."}";
-					}else{
+					}else
 						$_[] = $t.$K.": ".$V.";";
-					}
-				}
 				$_ = implode('',$_);
 				return $_;
 			}
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Header ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * HTML Header
 	 * --------------------------------------------------
 	 **/
 	static function Header()
 		{
 			$_[] = '<header id="header">';
 			$_[] = '<div id="logo-group">';
-				$_[] = '<span id="logo"><h1 id="logo"><span class="highlight">MEDIA</span><span class="plain">Universal</span></h1></span>';
-				$_[] = self::Header_Notifications();
+			$_[] = '<span id="logo"><h1 id="logo"><span class="highlight">MEDIA</span><span class="plain">Universal</span></h1></span>';
+			$_[] = self::Header_Notifications();
 			$_[] = '</div>';
 			$_[] = self::Header_Projects();
 			$_[] = self::Header_Right();
@@ -814,11 +721,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Header_Notifications ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * HTML User notifications
 	 * --------------------------------------------------
 	 **/
 	static function Header_Notifications()
@@ -829,15 +734,15 @@ class html {
 				$_[] = '<b class="badge" style="display:none;">0</b>';
 				$_[] = '</span>';
 				$_[] = '<div class="ajax-dropdown">';
-					$_[] = '<div class="btn-group btn-group-justified">';
-						$_[] = '<a class="btn btn-xs btn-default '.self::Cols(4).'" id="notify_tasks">Tasks</a>';
-						$_[] = '<a class="btn btn-xs btn-default '.self::Cols(4).'" id="notify_messages">Messages</a>';
-						$_[] = '<a class="btn btn-xs btn-warning '.self::Cols(4).'" id="notify_alerts">Alerts</a>';
-					$_[] = '</div>';
-					$_[] = '<div class="ajax-notifications custom-scroll">';
-						$_[] = '<div class="alert alert-transparent"><h4>Click a button to show messages here</h4></div>';
-						$_[] = '<i class="fa fa-lock fa-4x fa-border"></i>';
-					$_[] = '</div>';
+				$_[] = '<div class="btn-group btn-group-justified">';
+				$_[] = '<a class="btn btn-xs btn-default '.self::Cols(4).'" id="notify_tasks">Tasks</a>';
+				$_[] = '<a class="btn btn-xs btn-default '.self::Cols(4).'" id="notify_messages">Messages</a>';
+				$_[] = '<a class="btn btn-xs btn-warning '.self::Cols(4).'" id="notify_alerts">Alerts</a>';
+				$_[] = '</div>';
+				$_[] = '<div class="ajax-notifications custom-scroll">';
+				$_[] = '<div class="alert alert-transparent"><h4>Click a button to show messages here</h4></div>';
+				$_[] = '<i class="fa fa-lock fa-4x fa-border"></i>';
+				$_[] = '</div>';
 				$_[] = '</div>';
 				$_ = implode('',$_);
 				return $_;
@@ -845,11 +750,9 @@ class html {
 			return false;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Header_Projects ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * HTML Projects dropdown
 	 * --------------------------------------------------
 	 **/
 	static function Header_Projects()
@@ -875,68 +778,31 @@ class html {
 			return false;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Header_Right ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * Right side of the html header
 	 * --------------------------------------------------
 	 **/
 	static function Header_Right()
 		{
 			if(!empty($_COOKIE['mup_user_id'])){
 				$_[] = '<div class="pull-right">';
-				
 				$_[] = '<div id="hide-menu" class="btn-header pull-right">';
 				$_[] = '<span><a href="javascript:void(0);" title="Collapse Menu" data-action="minifyMenu"><i class="fa fa-reorder"></i></a></span>';
 				$_[] = '</div>';
-				/*
-				$_[] = '<ul id="mobile-profile-img" class="header-dropdown-list hidden-xs padding-5">
-						<li class="">
-							<a href="#" class="dropdown-toggle no-margin userdropdown" data-toggle="dropdown"> 
-								<img src="http://sa/img/avatars/sunny.png" alt="John Doe" class="online" />
-							</a>
-							<ul class="dropdown-menu pull-right">
-								<li>
-									<a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0"><i class="fa fa-cog"></i> Setting</a>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<a href="#ajax/profile.php" class="padding-10 padding-top-0 padding-bottom-0"> <i class="fa fa-user"></i> <u>P</u>rofile</a>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0" data-action="toggleShortcut"><i class="fa fa-arrow-down"></i> <u>S</u>hortcut</a>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<a href="javascript:void(0);" class="padding-10 padding-top-0 padding-bottom-0" data-action="launchFullscreen"><i class="fa fa-arrows-alt"></i> Full <u>S</u>creen</a>
-								</li>
-								<li class="divider"></li>
-								<li>
-									<a href="login.php" class="padding-10 padding-top-5 padding-bottom-5" data-action="userLogout"><i class="fa fa-sign-out fa-lg"></i> <strong><u>L</u>ogout</strong></a>
-								</li>
-							</ul>
-						</li>
-					</ul>';
-				
-				$_[] = self::Logout();
-				$_[] = self::SearchBox();
-				$_[] = self::FullScreen();
-				*/
+				//$_[] = self::Logout();
+				//$_[] = self::SearchBox();
+				//$_[] = self::FullScreen();
 				$_[] = '</div>';
-
 				$_ = implode('',$_);
 				return $_;
 			}
 			return false;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Logout ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * html logout button
 	 * --------------------------------------------------
 	 **/
 	static function Logout()
@@ -950,11 +816,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * SearchBox ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * html searchbox
 	 * --------------------------------------------------
 	 **/
 	static function SearchBox()
@@ -973,11 +837,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * FullScreen ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * Button to launch fullscreen
 	 * --------------------------------------------------
 	 **/
 	static function FullScreen()
@@ -991,14 +853,14 @@ class html {
 			return $_;	
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Cols ( $XS, $SM, $MD, $LG )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * styles responsive classes
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * @return string html head
+	 * @param mixed $XS extra small
+	 * @param mixed $SM small
+	 * @param mixed $MD medium
+	 * @param mixed $LG large
 	 * --------------------------------------------------
 	 **/
 	static function Cols($XS,$SM=false,$MD=false,$LG=false)
@@ -1027,11 +889,9 @@ class html {
 			return $_;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * CSS_Styles ( )
 	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @return string html head
+	 * Custom CSS Styles
 	 * --------------------------------------------------
 	 **/
 	static function CSS_Styles()
@@ -1074,6 +934,11 @@ class html {
     		$CSS['form.form-control']		= [
     			'label.input' 				=> [
     				'margin' 				=> '10px'
+    				]
+    			];
+    		$CSS['form.smart-form'] 		= [
+    			'label.label' 				=> [
+    				'text-align' 			=> 'right'
     				]
     			];
     		$CSS['h1#logo']			 		= [
@@ -1127,7 +992,14 @@ class html {
 				    			'font-size'	=> '14px',
 				    			'margin'	=> '0px',
 				    			'text-align'=> 'center'
-								]
+								],
+    						'span.btn'		=> [
+    							'width' 	=> '100%',
+    							'padding' 	=> '2px 5px',
+    							'i.fa' 		=> [
+    								'margin-right'=> '5px'
+    								]
+    							]
     						],
     					'td.toolbar' 		=> [
     						'text-align' 	=> 'center',
@@ -1154,15 +1026,13 @@ class html {
     			];
     		$CSS['div.modal'] 		 		= [
     			'div.modal-backdrop.in' 	=> [
-    				'opacity' 				=> '0.75'
-    				],
-    			'div.modal-dialog' 			=> [
-    				'width' 				=> '80% !important'
+    				'opacity' 				=> '0.6'
     				],
     			'div.modal-header' 			=> [
 	    			'background' 			=> '#265A88',
 	    			'color' 				=> 'white',
 	    			'text-shadow' 			=> '0px 0px 2px black',
+	    			'padding' 				=> '5px 10px !important',
 	    			'button.close' 			=> [
 	    				'color' 			=> 'white',
 	    				'opacity' 			=> '1'
@@ -1183,6 +1053,11 @@ class html {
 	    			]
     			];
     		$CSS['.widget-toolbar']  		= [
+    			'button.btn' 				=> [
+    				'i.fa' 					=> [
+    					'margin-right' 		=> '5px'
+    					]
+    				],
     			'label.text' 				=> [
     				'input[type=text]' 		=> [
     					'height'  			=> '20px !important',
@@ -1238,11 +1113,13 @@ class html {
     		$CSS['div[role=content]']		= [
     			'min-height'  				=> '100px'
     			];
+    		/*
     		$CSS['div.jarviswidget'] 		= [
     			'div.dt-toolbar' 			=> [
     				'display' 				=> 'none'
     				]
     			];
+    		*/
     		$CSS['div.hover'] 		 		= [
     			'&:hover' 					=> [
     				'background'			=> '#ececec'
@@ -1341,14 +1218,44 @@ class html {
 					'color'					=> '#EB9316'
 					]
 				];
+			$CSS['div.carousel'] 			= [
+				'div.carousel-inner' 		=> [
+					'div.item' 				=> [
+						'div.carousel-caption' => [
+							'top' 			=> '0px',
+							'padding' 		=> '10px'
+							]
+						]
+					]
+				];
+			$CSS['div.ModTools.well'] 		= [
+				'form.smart-form' 			=> [
+					'header' 				=> [
+						'background' 		=> 'none',
+						'border-bottom' 	=> '1px dashed white',
+						'h3' 				=> [
+							'color' 		=> 'white'
+							]
+						],
+					'footer' 				=> [
+						'background' 		=> 'none',
+						'border-top' 		=> '1px dashed white'
+						],
+					'label.label' 			=> [
+						'color' 			=> 'white'
+						],
+					'input[type=text]' 		=> [
+						'background' 		=> 'hsla(360,360,360,0.3)',
+						'color' 			=> 'white'
+						]
+					],
+				];
 			return $CSS;
 		}
 	/**
 	 * JSLibs
 	 * --------------------------------------------------
 	 * js libraries to be loaded
-	 * --------------------------------------------------
-	 * @return string html head
 	 * --------------------------------------------------
 	 **/
 	static function JSLibs()
@@ -1374,9 +1281,50 @@ class html {
 			$JS[] = '/sa/js/plugin/morris/raphael.min.js';
 			$JS[] = '/sa/js/plugin/bootstrap-switch/bootstrap-switch.js';
 			$JS[] = '/sa/js/plugin/dropzone/dropzone.min.js';
+			$JS[] = '/sa/js/plugin/cookies/jquery.cookies.js';
 			$JS[] = '/sa/js/app.min.js';
+			$JS[] = '/incl/js/js.js';
 			return $JS;
 		}
-}
+	/**
+	 * ImageSlider
+	 * --------------------------------------------------
+	 * Present an array of images in a bootstrap slider
+	 * --------------------------------------------------
+	 **/
+	static function ImageSlider($ID,$IMAGES,$path=false,$class=false)
+		{
+			# Set variables
+			$_id = $ID.'_slider';
+			$_li = ['data-target'=>'#'.$_id];
+			$_cc = 0;
 
+			# Loop through the images
+			foreach($IMAGES as $_image=>$_caption){
+				$_active = ($_cc == 0)?'active':'';
+				$_li['data-slide-to'] = $_cc;
+				$_cc++;
+
+				# Make image toggle icons
+				$ICONS[] = html::elmt('li',$_li,true);
+
+				# Make image slides
+				$_caption = html::elmt('div','carousel-caption',$_caption);
+				$SLIDES[] = html::elmt('div','item '.$_active,'<img src="'.$path.$_image.'" />'.$_caption);
+			}
+
+			# Create Image Slider container
+			$_ = '<div class="'.$class.' '.$ID.'_container">
+				<div class="well no-padding">
+					<div id="'.$_id.'" class="carousel slide">
+						<ol class="carousel-indicators">'.implode($ICONS).'</ol>
+						<div class="carousel-inner">'.implode($SLIDES).'</div>
+						<a class="left carousel-control" href="#'.$_id.'" data-slide="prev"> <span class="glyphicon glyphicon-chevron-left"></span> </a>
+						<a class="right carousel-control" href="#'.$_id.'" data-slide="next"> <span class="glyphicon glyphicon-chevron-right"></span> </a>
+					</div>
+				</div>
+			</div>';
+			return $_;
+		}
+}
 ?>

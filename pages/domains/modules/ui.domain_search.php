@@ -14,11 +14,11 @@ if(isset($_REQUEST['domain_search'])){
 	 * -----
 	 **/
 	$DATA = array_map('mysql_real_escape_string',$_REQUEST);
-	$DOMAIN = urldecode($DATA['domain_search']);
-	$EXPIRED = urldecode($DATA['expired']);
+	$DOMAIN = urldecode(@$DATA['domain_search']);
+	$EXPIRED = urldecode(@$DATA['expired']);
 	$EXPIRED = ($EXPIRED=='on')?"AND `expires` > NOW() ":false;
-	$UNUSED = urldecode($DATA['unused']);
-	$UNUSED = ($UNUSED=='on')?false:"AND `status` > 0 ";
+	$UNUSED = urldecode(@$DATA['unused']);
+	$UNUSED = ($UNUSED=='off')?"AND `status` > 0 ":false;
 
 	/**
 	 * retrieve Account details from database
@@ -32,8 +32,6 @@ if(isset($_REQUEST['domain_search'])){
 	ORDER BY `domain` ASC 
 	LIMIT 1000;";
 	$D = $X->DB->Q($HDT,$QUERY);
-
-
 	$class = ['alert','alert-info','no-margin','txt-color-white'];
 	foreach($D as $i=>$d){
 

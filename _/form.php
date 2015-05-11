@@ -38,7 +38,7 @@ class FORMS {
 		$id = "id=\"$id\"";
 		if ($class === false) {$class = 'smart-form';}
 		if (is_numeric($width)) {$width = " style=\"width:{$width}px\"";}
-		$this->FORM[$this->id][] = "<div class=\"widget-body no-padding\"><form enctype=\"multipart/form-data\" method=\"POST\" $id class=\"{$class}\" {$width}>";
+		$this->FORM[$this->id][] = "<form enctype=\"multipart/form-data\" method=\"POST\" $id class=\"{$class}\" {$width}>";
 		}
 	/**
 	 * FunctionName ( $x [, $y [, $z]] )
@@ -256,7 +256,7 @@ class FORMS {
 	 * @param int $height pixels for height
 	 * --------------------------------------------------
 	 **/
-	public function Textarea($name, $value = false, $label = true, $width = false, $height = false, $ToolTip) {
+	public function Textarea($name, $value = false, $label = true, $width = false, $height = false, $ToolTip=false) {
 		if ($label === true) {$this->Label($name);} elseif ($label) {$this->Label($label);}
 		if ($value === false) {$value = @$_REQUEST[$name];}
 		if (is_numeric($width)) {
@@ -382,7 +382,7 @@ class FORMS {
 	 * --------------------------------------------------
 	 **/
 	public function Label($T, $C = false) {
-		$_[] = "<section class=\"col col-xs-3 col-sm-2 padding-5 no-margin\">";
+		$_[] = "<section class=\"col col-xs-2 padding-5 no-margin\">";
 		$_[] = "<label class=\"label padding-5 no-margin\">".ucfirst($T).": ".$C."</label>";
 		$_[] = "</section>";
 		$_ = implode(EOL,$_);
@@ -470,7 +470,7 @@ class FORMS {
 	 **/
 	public function PrintForm($id = false) {
 		$this->id = empty($id)?$this->id:$id;
-		$this->FORM[$this->id][] = "</form></div>";
+		$this->FORM[$this->id][] = "</form>";
 		$form = implode(EOL, $this->FORM[$this->id]);
 		return $form;
 	}

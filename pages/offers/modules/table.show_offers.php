@@ -5,72 +5,31 @@ $X = new X();
 
 # Get Offers from the database
 $Offers = GetOffers($X->DB);
-
-# Get Offer Suppression Status
 $Sups = GetActiveSups($X->DB);
 
 # Parse offers array
 foreach($Offers as $id=>$offer){
-	$Offers[$id]['name'] = html::elmt('i','font-lg',$offer['name']);
-    list($a,$b)    = ($offer['on'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
-    $Offers[$id]['on']   = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
-    list($a,$b)    = ($offer['auto'] == 0)?['default txt-color-blueLight','<i class="fa fa-minus"></i> Off']:['success','<i class="fa fa-check"></i> On'];
-    $Offers[$id]['auto'] = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
-    list($a,$b)    = in_array($offer['sup'],$Sups)?['success','<i class="fa fa-check"></i>']:['warning','<i class="fa fa-warning txt-color-red"></i>'];
-    $Offers[$id]['sup']  = '<span class="btn btn-'.$a.' btn-xs '.html::Cols(12).'">'.$b.'</span>';
+	$Offers[$id]['name'] = html::elmt('i','font-md',$offer['name']);
+    list($a,$b,$c) = ($offer['on'] == 0)?['default txt-color-blueLight','minus','Off']:['success','check','On'];
+    $Offers[$id]['on'] = html::elmt('span','btn btn-xs font-xs btn-'.$a,html::elmt('i','fa fa-'.$b,true).$c);
+    list($a,$b,$c) = ($offer['auto'] == 0)?['default txt-color-blueLight','minus','Off']:['success','check','On'];
+    $Offers[$id]['auto'] = html::elmt('span','btn btn-xs font-xs btn-'.$a,html::elmt('i','fa fa-'.$b,true).$c);
+    list($a,$b,$c) = empty($Sups[$offer['sup']])?['warning','warning text-danger','Expired']:['success','check',$Sups[$offer['sup']]];
+    $Offers[$id]['sup'] = html::elmt('span','btn btn-xs font-xs btn-'.$a,html::elmt('i','fa fa-'.$b,true).$c);
 }
 
 # Make DataTable for offers array
-$ID    = 'OffersTable';
-$DTbl  = "{'pageLength': 25}";
-$TOOLS = false;//['right'=>[['icon'=>'arrow-circle-right fa-2x','name'=>'id','id'=>'EditOffer']]];
-$CLASS = 'table-striped table-bordered table-hover no-footer';
+$ID = 'OffersTable';
+$DTbl = "{'pageLength': 25}";
+$TOOLS = false;
+$CLASS = 'table-striped table-hover no-footer';
 $T = new TBL($ID,$DTbl);
 $T = $T->Make($Offers,$TOOLS,$CLASS);
 
 # Print Offers table
 html::PrintOut($T,'Offers');
-echo html::JS("
-	$(document).on('click','td#on span.btn',function(){
-	    var sts = $(this).text();
-	    var td = $(this).parent();
-	    var id = td.parent().attr('id');
-	    loadURL('pages/offers/modules/update.offer_details.php?id='+id+'&act=toggleActive&sts='+sts,td);
-	});
-	$(document).on('click','td#auto span.btn',function(){
-	    var sts = $(this).text();
-	    var td = $(this).parent();
-	    var id = td.parent().attr('id');
-	    loadURL('pages/offers/modules/update.offer_details.php?id='+id+'&act=toggleAuto&sts='+sts,td);
-	});
-	$(document).on('click','td#name',function(){
-		var id = $(this).parent().attr('id');
-		container = $('div#OfferOverview').find('div[role=content]');
-		loadURL('pages/offers/modules/ui.offer_overview.php?id='+id,container);
-	});
-
-	$(document).on('click','td#sup span.btn',function(){
-	    var td = $(this).parent();
-	    var id = td.parent().attr('id');
-		$('#content').append('<article id=\"OfferSuprression'+id+'\"><div role=\"content\"></div></article>');
-		var container = $('article#OfferSuprression'+id);
-	    loadURL('pages/offers/modules/form.offer_suppression.php?id='+id,container);
-
-	});
-");
-/*
-$.SmartMessageBox({
-    title: '<i class=\'fa fa-warning fa-2x text-warning\'></i> Suppression <span class=\'text-warning\'><strong>Update</strong></span>',
-    content: 'The suppression update feature is still under construction!',
-    buttons: '[Done]'
-}, function(a) {
-    'Yes' == a && ($.root_.addClass('animated fadeOutUp'), setTimeout(b, 1e3))
-});
-*/
-
 
 # Function
-
 function GetActiveSups($DB)
 	{
 		$day = time()-(10*86400);
@@ -79,8 +38,12 @@ function GetActiveSups($DB)
 		$QUERY = "SELECT `UPDATE_TIME` AS `time`,`TABLE_NAME` AS `name` FROM  `information_schema`.`tables` WHERE  `TABLE_SCHEMA` = 'suppression' AND `TABLE_NAME` LIKE 'sublists__%'";
 		$Q = $DB->Q($HDT,$QUERY);
 		if($Q) foreach($Q as $q)
-			if ($q['time'] >= $exp)
-				$S[str_ireplace('sublists__','',$q['name'])] = str_ireplace('sublists__','',$q['name']);
+			if ($q['time'] >= $exp){
+				$days = floor((time() - strtotime($q['time']))/86400);
+				$days = $days==0?'today':($days==1?'yesterday':$days.' days');
+				$sup_name = str_ireplace('sublists__','',$q['name']);
+				$S[$sup_name] = $days;
+			}
 		$Sups = empty($S)?[]:$S;
 		return $Sups;
 	}

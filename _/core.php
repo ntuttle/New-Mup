@@ -1,7 +1,6 @@
 <?php
-if(!defined('DIR')){
+if(!defined('DIR'))
 	define('DIR',$_SERVER['DOCUMENT_ROOT']);
-}
 require_once DIR.'/_/conf.php';
 require_once DIR.'/_/sql.php';
 require_once DIR.'/_/frame.php';
@@ -9,7 +8,10 @@ require_once DIR.'/_/table.php';
 require_once DIR.'/_/form.php';
 require_once DIR.'/sa/lib/config.php';
 
-
+/**
+ * X - Core Builder Class
+ * --------------------------------------------------
+ **/
 class X {
 
 	var $DB;
@@ -19,12 +21,11 @@ class X {
 		{
 			$this->DB_Connect();
 			$this->CheckUser();
-			$this->MakeResponse();
 		}
 	/**
-	 * DB_Connect ( $title )
+	 * DB_Connect ( void )
 	 * --------------------------------------------------
-	 * returns the html head of the parent document
+	 * connect to the databases needed to run the pages
 	 * --------------------------------------------------
 	 **/
 	public function DB_Connect()
@@ -53,7 +54,7 @@ class X {
 			exit($_);
 		}
 	/**
-	 * X::CreateUserDir( $id )
+	 * CreateUserDir( $id )
 	 * --------------------------------------------------
 	 * Checks that the user directory exists for docs and 
 	 * profile settings
@@ -64,18 +65,15 @@ class X {
 	public function CreateUserDir($id)
 		{
 			$UserDir = DIR.'/data/users/'.$id.'/';
-			if(!file_exists($UserDir)){
+			if(!file_exists($UserDir))
 				mkdir($UserDir);
-			}
-			if(!file_exists($UserDir.'_profile/')){
+			if(!file_exists($UserDir.'_profile/'))
 				mkdir($UserDir.'_profile/');
-			}
-			if(!file_exists($UserDir.'_profile/default.jpg') && !file_exists($UserDir.'_profile/default.png')){
+			if(!file_exists($UserDir.'_profile/default.jpg') && !file_exists($UserDir.'_profile/default.png'))
 				copy(DIR.'/data/users/0/default.png',$UserDir.'_profile/default.png');
-			}
 		}
 	/**
-	 * X::CheckUser( void )
+	 * CheckUser( void )
 	 * --------------------------------------------------
 	 * check that the user is logged in or that a login
 	 * request is valid, otherwise stop script and display
@@ -124,15 +122,14 @@ class X {
 				exit();
 			}
 			return true;
-		}
-	
+		}	
 	/**
-	 * Head ( $title )
+	 * Login ( $MSG, $msg_type )
 	 * --------------------------------------------------
-	 * returns the html head of the parent document
+	 * prints the page for the user to login
 	 * --------------------------------------------------
-	 * @param string $title Title of the document
-	 * @return string html head
+	 * @param string $MSG msg to display if any
+	 * @param string $msg_type class of message
 	 * --------------------------------------------------
 	 **/
 	public function Login($MSG=false,$msg_type='danger')
@@ -143,8 +140,6 @@ class X {
 			$_width 	= html::Cols([1=>10],[2=>8],[3=>6],[4=>4]);
 			$_tools  	= false;
 			$_args 		= ['article'=>['style'=>'margin-top:100px;']];
-
-			# Make the login form
 			$F = new FORMS($_id);
 			if($MSG)
 				$F->Write(html::alert($msg_type,$MSG));
@@ -156,136 +151,18 @@ class X {
 			$F->Submit('login','LOGIN','btn btn-warning btn-xs font-xs pull-right');
 			$F->Write('</footer>');
 			$LoginForm = html::elmt('div','row',$F->PrintForm());
-
-			# Make the widget containing the login form
 			$WIDGET     = html::MakeWidget($_id, $LoginForm, $_title, $_width, $_tools, $_args);
-
-			# Return the form html
 			$_ = html::MakeHTML($WIDGET,'Login','minified');
 			return $_;
-		}
-	
+		}	
 	/**
-	 * Head ( $title )
+	 * parseIPs ( $IPs )
 	 * --------------------------------------------------
-	 * returns the html head of the parent document
+	 * parse ips string into ips array
 	 * --------------------------------------------------
-	 * @param string $title Title of the document
-	 * @return string html head
+	 * @param string $IPs string of ips serperated by " ", "\t" or "\n"
 	 * --------------------------------------------------
 	 **/
-	public function MakeResponse()
-		{
-			if(!empty($_REQUEST['AJAX'])){
-				return $this->$_REQUEST['AJAX']();
-			}else{
-				
-			}
-		}
-	
-	/**
-	 * Head ( $title )
-	 * --------------------------------------------------
-	 * returns the html head of the parent document
-	 * --------------------------------------------------
-	 * @param string $title Title of the document
-	 * @return string html head
-	 * --------------------------------------------------
-	 **/
-	public function User_Notify()
-		{
-			$_[] = '<ul class="notification-body">';
-			$_[] = '<li>';
-				$_[] = '<span class="padding-10 unread">';
-					$_[] = '<em class="badge padding-5 no-border-radius bg-color-blueLight pull-left margin-right-5"><i class="fa fa-user fa-fw fa-2x"></i></em>';
-					$_[] = '<span>2 new users just signed up! <span class="text-primary">martin.luther</span> and <span class="text-primary">kevin.reliey</span>
-						 <br>
-						 <span class="pull-right font-xs text-muted"><i>1 min ago...</i></span>
-					</span>';
-				$_[] = '</span>';
-			$_[] = '</li>';
-
-			$_[] = '<li>
-					<span class="padding-10 unread">
-						<em class="badge padding-5 no-border-radius bg-color-purple txt-color-white pull-left margin-right-5">
-							<i class="fa fa-calendar fa-fw fa-2x"></i>
-						</em>
-						<span>
-							 <a href="javascript:void(0);" class="display-normal"><strong>Calendar</strong></a>: Sadi Orlaf invites you to lunch! 
-							 <br>
-							 <strong>When: 1/3/2014 (1pm - 2pm)</strong><br>
-							 <span class="pull-right font-xs text-muted"><i>3 hrs ago...</i></span>
-						</span>
-						
-					</span>
-				</li>	
-				<li>
-					<span class="padding-10">
-
-						<em class="badge padding-5 no-border-radius bg-color-blueLight txt-color-white pull-left margin-right-5">
-							<i class="fa fa-user fa-fw fa-2x"></i>
-						</em>
-						
-						<span>
-							 <a href="javascript:void(0);" class="display-normal">Sofia</a> as contact? &nbsp;
-							 <button class="btn btn-xs btn-primary margin-top-5">accept</button>
-							 <button class="btn btn-xs btn-danger margin-top-5">reject</button>
-							 <span class="pull-right font-xs text-muted"><i>3 hrs ago...</i></span>
-						</span>
-						
-					</span>
-				</li>	
-				<li>
-					<span class="padding-10">
-
-						<em class="badge padding-5 no-border-radius bg-color-blue pull-left margin-right-5">
-							<i class="fa fa-facebook fa-fw fa-2x"></i>
-						</em>
-						
-						<span>
-							 Facebook recived +33 unique likes
-							 <br>
-							 <span class="pull-right font-xs text-muted"><i>4 hrs ago...</i></span>
-						</span>
-						
-					</span>
-				</li>
-				<li>
-					<span class="padding-10">
-
-						<em class="badge padding-5 no-border-radius bg-color-green pull-left margin-right-5">
-							<i class="fa fa-check fa-fw fa-2x"></i>
-						</em>
-						
-						<span>
-							 2 projects were completed on time! Submitted for your approval - <a href="javascript:void(0);" class="display-normal">Click here</a>
-							 <br>
-							 <span class="pull-right font-xs text-muted"><i>1 day ago...</i></span>
-						</span>
-						
-					</span>
-				</li>
-				<li>
-					<span class="padding-10">
-
-						<em class="badge padding-5 no-border-radius bg-color-greenLight pull-left margin-right-5">
-							<i class="fa fa-lock fa-fw fa-2x"></i>
-						</em>
-						
-						<span>
-							 Your password was recently updated. Please complete your security questions from your profile page.
-							 <br>
-							 <span class="pull-right font-xs text-muted"><i>2 weeks ago...</i></span>
-						</span>
-						
-					</span>
-				</li>
-			</ul>';
-			
-			$_ = implode(EOL,$_);
-			return $_;
-		}
-
 	static function parseIPs($IPs)
 		{
 			$_IPs = [];
@@ -297,22 +174,27 @@ class X {
 					if(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$IP,$x)){
 						$_IPs[] = ip2long($x[1]);
 					}elseif(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)([0-9]{1,3})\-([0-9]{1,3})$/',$IP,$x)){
-						for($i=$x[2];$i<=$x[3];$i++){
+						for($i=$x[2];$i<=$x[3];$i++)
 							$_IPs[] = ip2long($x[1].$i);
-						}
 					}elseif(preg_match('/^([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})\-([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})$/',$IP,$x)){
 						$start = ip2long($x[1]);
 						$end = ip2long($x[2]);
-						for($i=$start;$i<=$end;$i++){
+						for($i=$start;$i<=$end;$i++)
 							$_IPs[] = ip2long($i);
-						}
-					}elseif(is_numeric($IP)){
+					}elseif(is_numeric($IP))
 						$_IPs[] = $IP;
-					}
 				}
 			}
 			return $_IPs;
 		}
+	/**
+	 * getTargets ( $domains )
+	 * --------------------------------------------------
+	 * get targets or domains array
+	 * --------------------------------------------------
+	 * @param boolean $domains return domains or not
+	 * --------------------------------------------------
+	 **/
 	public function getTargets($domains=false)
 		{
 			$ESPs = new ESPs($this->DB);
@@ -321,7 +203,12 @@ class X {
 			return $ESPs->Tgets;
 		}
 }
-
+/**
+ * ESPs
+ * --------------------------------------------------
+ * Used by @see self::getTargets()
+ * --------------------------------------------------
+ **/
 class ESPs {
 
 	var $ESP;

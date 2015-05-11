@@ -1,16 +1,9 @@
 <?php
-/**
- * Start the Page
- * --------------------------------------------------
- **/
+# Start the Page
 require_once $_SERVER['DOCUMENT_ROOT'].'/_/core.php';
 $X = new X();
 
-
-/**
- * Get count from arg
- * --------------------------------------------------
- **/
+# Get count from arg
 switch(@$_REQUEST['count']){
 	case 'IPsCount':
 		$count = GetIPCount($X->DB);
@@ -32,17 +25,10 @@ switch(@$_REQUEST['count']){
 		break;
 }
 
-/**
- * echo the count
- * --------------------------------------------------
- **/
+# echo the count
 echo html::elmt('small',false,html::elmt('small',false,$count));
 
-
-/**
- * Functions
- * --------------------------------------------------
- **/
+# Functions
 function GetIPCount($DB)
 	{		
 		# query the database

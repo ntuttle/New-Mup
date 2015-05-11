@@ -11,17 +11,18 @@ $X = new X();
  * --------------------------------------------------
  **/
 $HDT = 'MASTER.domains.domains';
-$W = ['status'=>0,'expires__>'=>date('Y-m-d',time()+(86400*14)),'ORDER'=>['id'=>'DESC']];
-$F = ['domain'=>'id','domain'];
+$W = ['status'=>0,'expires__>'=>date('Y-m-d',time()+(86400*14)),'ORDER'=>['name'=>'DESC']];
+$F = ['domain'=>'name'];
 $L = 2500;
 $Q = $X->DB->GET($HDT,$W,$F,$L);
+foreach($Q as $i=>$q)
+	$DATA[$q['name']]['name'] = $q['name'];
 
 /**
  * Make Accounts Table
  * --------------------------------------------------
  **/
 $ID 	= 'AvailableDomains';
-$DATA 	= $Q;
 $CLASS 	= 'table-striped table-bordered table-hover no-footer';
 $DTbl 	= true;
 

@@ -1,35 +1,4 @@
 <?php
-/* 
-### DB - Database Class
-# --------------------------------------------------
-# HOW TO USE
-# --------------------------------------------------
-# Create a new Database Class with Initial DB Connection
-# --------------------------------------------------
-$DB = new DB($name1, $host, $user, $pass);
-
-#
-# Establish addition DB Connections 
-# --------------------------------------------------
-$DB->C($name2, $host, $user, $pass);
-
-#
-# Set up database query
-# --------------------------------------------------
-$HDT = $name1.'.database.table'	// hostName.dbName.tblName
-$W = ['a'=>1,'b'=>2] 			// WHERE `a`=1 AND `b`=2
-$W['c__<='] = 10				// WHERE `a`=1 AND `b`=2 AND `c` <= 10
-$F = ['a', 'b', 'c']; 			// SELECT `a`,`b`,`c` FROM ...
-
-#
-# Query the database
-# --------------------------------------------------
-$DB->GET($HDT, $W, $F);
-
-# --------------------------------------------------
-*/
-
-
 /**
  * DB - Database Class
  * --------------------------------------------------
@@ -41,18 +10,18 @@ $DB->GET($HDT, $W, $F);
  **/
 class DB {
 
-	var $H;// HOST
-	var $D;// DATABASE
-	var $T;// TABLE
-	var $N;// CURRENT HOST
-	var $S   = array();// DB STREAMS
-	var $Q   = array();// SUCCESSFULL QUERIES
-	var $E   = array();// ERRORS
-	var $R   = array();// CURRENT RESULT
-	var $nR  = 0;// NUMBER OF ROW
-	var $aR  = 0;// AFFECTED ROWS
-	var $rID = 0;// ROW ID
-	var $lID = 0;// LAST ID
+	var $H;				// HOST
+	var $D;				// DATABASE
+	var $T;				// TABLE
+	var $N;				// CURRENT HOST
+	var $S   = array();	// DB STREAMS
+	var $Q   = array();	// SUCCESSFULL QUERIES
+	var $E   = array();	// ERRORS
+	var $R   = array();	// CURRENT RESULT
+	var $nR  = 0;		// NUMBER OF ROW
+	var $aR  = 0;		// AFFECTED ROWS
+	var $rID = 0;		// ROW ID
+	var $lID = 0;		// LAST ID
 	var $Key = array('id' => false);// Result Row Identifier 'name'=> true|false
 
 	public function __construct($N, $H = 'localhost', $U = 'root', $P = false) 
@@ -234,189 +203,198 @@ class DB {
 			return $vA;
 		}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * xQ ( $vS )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * check whether or not to clean the query string
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $vS value string
 	 * --------------------------------------------------
 	 **/
-	public function xQ($vS) {
-		if (is_string($vS)) {
-			if (!stristr($vS, '`') && !stristr($vS, '(')) {
-				$vS = is_string($vS)?mysql_real_escape_string($vS):$vS;
+	public function xQ($vS)
+		{
+			if (is_string($vS))
+				if (!stristr($vS, '`') && !stristr($vS, '('))
+					$vS = is_string($vS)?mysql_real_escape_string($vS):$vS;
+			return $vS;
+		}
+	/**
+	 * SET ( $C, $F, $Q, $L )
+	 * --------------------------------------------------
+	 * Set fields in the database
+	 * --------------------------------------------------
+	 * @param string $C connector
+	 * @param array $F fields to set
+	 * @param array $Q criteria
+	 * @param string $L limit
+	 * --------------------------------------------------
+	 **/
+	public function SET($C, $F, $Q = false, $L = 1)
+		{
+			$F = $this->W($F, 'S');
+			$Q = $this->W($Q, 'W');
+			if($L)
+				$L = "LIMIT $L";
+			if($this->pC($C)){
+				$D = $this->D;
+				$T = $this->T;
+				$H = $this->H;
+				$S = $this->S[$H];
+				$this->lID = 0;
+				$this->aR = 0;
+				if(!$Q)
+					$Q = 1;
+				$Q = "UPDATE `{$D}`.`{$T}` SET {$F} WHERE {$Q} {$L}";
+				$this->R = false;
+				if (mysql_query($Q, $S)) {
+					$this->Q[] = $Q;
+					$this->aR = mysql_affected_rows($S);
+					$this->lID = mysql_insert_id($S);
+				} else
+					$this->E($Q);
+			} else
+				echo "PARSE FAIL!";
+		}
+	/**
+	 * gSET ( $C, $F, $Q, $L )
+	 * --------------------------------------------------
+	 * Set fields in the database
+	 * --------------------------------------------------
+	 * @param string $C connector
+	 * @param array $F fields to set
+	 * @param array $Q criteria
+	 * @param string $L limit
+	 * --------------------------------------------------
+	 **/
+	public function gSET($C, $F, $Q = false, $L = 1)
+		{
+			$F = $this->W($F, 'S');
+			$Q = $this->W($Q, 'G');
+			if($L)
+				$L = "LIMIT $L";
+			if($this->pC($C)) {
+				$D = $this->D;
+				$T = $this->T;
+				$H = $this->H;
+				$S = $this->S[$H];
+				$this->lID = 0;
+				$this->aR = 0;
+				if(!$Q)
+					$Q = 1;
+				$Q = "UPDATE `{$D}`.`{$T}` SET {$F} WHERE {$Q} {$L}";
+				$this->R = false;
+				if (mysql_query($Q, $S)) {
+					$this->Q[] = $Q;
+					$this->aR = mysql_affected_rows($S);
+					$this->lID = mysql_insert_id($S);
+				} else
+					$this->E($Q);
+			} else 
+				echo "PARSE FAIL!";
+		}
+	/**
+	 * PUT ( $C, $F, $V, $e )
+	 * --------------------------------------------------
+	 * Insert into a database
+	 * --------------------------------------------------
+	 * @param string $C connector
+	 * @param array $F fields inserting to
+	 * @param array $V values to insert
+	 * @param string $e extra params like IGNORE | DELAYED
+	 * --------------------------------------------------
+	 **/
+	public function PUT($C, $F, $V, $e = false)
+		{
+			$u = false;
+			if (stristr($e, 'update')) {
+				$u = " ON DUPLICATE KEY ".$e;
+				$e = false;
+			}
+			$this->R = false;
+			$F = $this->W($F, 'P');
+			$V = $this->W($V, 'V');
+			if ($this->pC($C)) {
+				$D = $this->D;
+				$T = $this->T;
+				$H = $this->H;
+				$S = $this->S[$H];
+				$this->lID = 0;
+				$this->aR  = 0;
+				$Q = "INSERT {$e} INTO `{$D}`.`{$T}` {$F} VALUES {$V} {$u}";
+				if (mysql_query($Q, $S)) {
+					$this->Q[] = $Q;
+					$this->aR  = mysql_affected_rows($S);
+					$this->lID = mysql_insert_id($S);
+				} else
+					$this->E($Q);
 			}
 		}
-		return $vS;
-	}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * DEL ( $C, $Q, $L )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Delete from the database
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $C connector
+	 * @param string $Q criteria
+	 * @param int $L Limit
 	 * --------------------------------------------------
 	 **/
-	public function SET($C, $F, $Q = false, $L = 1) {
-		$F = $this->W($F, 'S');
-		$Q = $this->W($Q, 'W');
-
-		if ($L) {$L = "LIMIT $L";}
-		if ($this->pC($C)) {
-			$D = $this->D;
-			$T = $this->T;
-			$H = $this->H;
-			$S = $this->S[$H];
-
-			$this->lID   = 0;
-			$this->aR    = 0;
-			if (!$Q) {$Q = 1;}
-			$Q           = "UPDATE `{$D}`.`{$T}` SET {$F} WHERE {$Q} {$L}";
-			$this->R     = false;
-			if (mysql_query($Q, $S)) {
-				$this->Q[] = $Q;
-				$this->aR  = mysql_affected_rows($S);
-				$this->lID = mysql_insert_id($S);
-			} else { $this->E($Q);}
-		} else {echo "PARSE FAIL!";}
-	}
-	/**
-	 * FunctionName ( $x [, $y [, $z]] )
-	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * --------------------------------------------------
-	 **/
-	public function gSET($C, $F, $Q = false, $L = 1) {
-		$F = $this->W($F, 'S');
-		$Q = $this->W($Q, 'G');
-
-		if ($L) {$L = "LIMIT $L";}
-		if ($this->pC($C)) {
-			$D = $this->D;
-			$T = $this->T;
-			$H = $this->H;
-			$S = $this->S[$H];
-
-			$this->lID   = 0;
-			$this->aR    = 0;
-			if (!$Q) {$Q = 1;}
-			$Q           = "UPDATE `{$D}`.`{$T}` SET {$F} WHERE {$Q} {$L}";
-			$this->R     = false;
-			if (mysql_query($Q, $S)) {
-				$this->Q[] = $Q;
-				$this->aR  = mysql_affected_rows($S);
-				$this->lID = mysql_insert_id($S);
-			} else { $this->E($Q);}
-		} else {echo "PARSE FAIL!";}
-	}
-	/**
-	 * FunctionName ( $x [, $y [, $z]] )
-	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * --------------------------------------------------
-	 **/
-	public function PUT($C, $F, $V, $e = false) {
-		$u = false;
-		if (stristr($e, 'update')) {
-			$u = " ON DUPLICATE KEY ".$e;
-			$e = false;
+	public function DEL($C, $Q, $L = false)
+		{
+			if ($this->pC($C) !== false) {
+				$D = $this->D;
+				$T = $this->T;
+				$H = $this->H;
+				$S = $this->S[$H];
+				$this->lID = 0;
+				$this->aR = 0;
+				if(!$L)
+					$L = 1;
+				$L = "LIMIT {$L}";
+				$Q = $this->W($Q, 'W');
+				$Q = "DELETE FROM `{$D}`.`{$T}` WHERE {$Q} {$L}";
+				if ($R = mysql_query($Q, $S)) {
+					$this->Q[] = $Q;
+					$R = mysql_affected_rows($S);
+					$this->aR = $R;
+					$this->R = $R;
+				} else
+					$this->E($Q);
+			}
 		}
-		$this->R = false;
-		$F       = $this->W($F, 'P');
-		$V       = $this->W($V, 'V');
-
-		if ($this->pC($C)) {
-			$D = $this->D;
-			$T = $this->T;
-			$H = $this->H;
-			$S = $this->S[$H];
-
-			$this->lID = 0;
-			$this->aR  = 0;
-			$Q         = "INSERT {$e} INTO `{$D}`.`{$T}` {$F} VALUES {$V} {$u}";
-			if (mysql_query($Q, $S)) {
-				$this->Q[] = $Q;
-				$this->aR  = mysql_affected_rows($S);
-				$this->lID = mysql_insert_id($S);
-			} else { $this->E($Q);}
-		}
-	}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * Q ( $C, $Q )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Raw query to the database
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $C connector
+	 * @param string $Q query
 	 * --------------------------------------------------
 	 **/
-	public function DEL($C, $Q, $L = false) {
-		if ($this->pC($C) !== false) {
-			$D = $this->D;
-			$T = $this->T;
-			$H = $this->H;
-			$S = $this->S[$H];
-
-			$this->lID   = 0;
-			$this->aR    = 0;
-			if (!$L) {$L = 1;}$L = "LIMIT {$L}";
-			$Q           = $this->W($Q, 'W');
-			$Q           = "DELETE FROM `{$D}`.`{$T}` WHERE {$Q} {$L}";
-			if ($R = mysql_query($Q, $S)) {
-				$this->Q[] = $Q;
-				$R         = mysql_affected_rows($S);
-				$this->aR  = $R;
-				$this->R   = $R;
-			} else { $this->E($Q);}
+	public function Q($C, $Q)
+		{
+			if ($this->pC($C) !== false) {
+				$D = $this->D;
+				$T = $this->T;
+				$H = $this->H;
+				$S = $this->S[$H];
+				$this->lID = 0;
+				$this->aR = 0;
+				if ($X = mysql_query($Q, $S)) {
+					$this->Q[] = $Q;
+					$i = 0;
+					while ($r = @mysql_fetch_assoc($X)) {
+						$ID = $i;
+						if (isset($r['id'])) {$ID = $r['id'];unset($r['id']);}
+						foreach ($r as $k => $v) {$R[$ID][$k] = $v;}$i++;
+					}
+					$this->lID = mysql_insert_id($S);
+					$this->aR = mysql_affected_rows($S);
+					$this->nR = count($R);
+					return $this->R = $R;
+				} else
+					$this->E($Q);
+			}
 		}
-	}
-	/**
-	 * FunctionName ( $x [, $y [, $z]] )
-	 * --------------------------------------------------
-	 * Description of function here
-	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
-	 * --------------------------------------------------
-	 **/
-	public function Q($C, $Q) {
-		if ($this->pC($C) !== false) {
-			$D = $this->D;
-			$T = $this->T;
-			$H = $this->H;
-			$S = $this->S[$H];
-
-			$this->lID = 0;
-			$this->aR  = 0;
-			if ($X = mysql_query($Q, $S)) {
-				$this->Q[] = $Q;
-				$i         = 0;
-				while ($r = @mysql_fetch_assoc($X)) {
-					$ID                                   = $i;
-					if (isset($r['id'])) {$ID             = $r['id'];unset($r['id']);}
-					foreach ($r as $k => $v) {$R[$ID][$k] = $v;}$i++;
-				}
-				$this->lID      = mysql_insert_id($S);
-				$this->aR       = mysql_affected_rows($S);
-				$this->nR       = count($R);
-				return $this->R = $R;
-			} else { $this->E($Q);}
-		}
-	}
 	/**
 	 * $DB->GET($HDT, $W, $F, $L, $e)
 	 * --------------------------------------------------
@@ -429,101 +407,89 @@ class DB {
 	 * @param int $e {DELAYED|IGNORE|DUPLICATE KEY UPDATE ... }
 	 * --------------------------------------------------
 	 **/
-	public function GET($C, $Q = false, $F = "*", $L = 1000) {
-		$R = false;
-		$this->pC($C);
-		$D = $this->D;
-		$T = $this->T;
-		$H = $this->H;
-		$S = $this->S[$H];
-		$this->lID = 0;
-		$this->aR = 0;
-		$F = $this->W($F, 'F');
-		if ($L) {
-			$L = "LIMIT $L";
-		}
-		if ($Q) {
-			if (is_array($Q)) {
-				$Q = $this->W($Q, 'G');
-			}$Q = "WHERE {$Q}";
-		}
-		if (!empty($this->JOIN)) {
-			$J = $this->JOIN;
-			unset($this->JOIN);
-		} else {
-			$J = false;
-		}
-		$id = key($this->Key);
-		$Q  = "SELECT {$F} FROM `{$D}`.`{$T}`{$J} {$Q} {$L}";
-		if ($X = mysql_query($Q, $S)) {
-			$i         = 0;
-			$this->Q[] = $Q;
-			while ($r = mysql_fetch_assoc($X)) {
-				$ID = $i;
-				if (isset($r[$id])) {
-					$ID = $r[$id];
-					if ($this->Key[$id] === false) {
-						unset($r[$id]);
+	public function GET($C, $Q = false, $F = "*", $L = 1000)
+		{
+			$R = false;
+			$this->pC($C);
+			$D = $this->D;
+			$T = $this->T;
+			$H = $this->H;
+			$S = $this->S[$H];
+			$this->lID = 0;
+			$this->aR = 0;
+			$F = $this->W($F, 'F');
+			if($L)
+				$L = "LIMIT $L";
+			if($Q){
+				if(is_array($Q))
+					$Q = $this->W($Q, 'G');
+				$Q = "WHERE {$Q}";
+			}
+			if(!empty($this->JOIN)){
+				$J = $this->JOIN;
+				unset($this->JOIN);
+			}else
+				$J = false;
+			$id = key($this->Key);
+			$Q  = "SELECT {$F} FROM `{$D}`.`{$T}`{$J} {$Q} {$L}";
+			if ($X = mysql_query($Q, $S)) {
+				$i = 0;
+				$this->Q[] = $Q;
+				while($r = mysql_fetch_assoc($X)){
+					$ID = $i;
+					if(isset($r[$id])){
+						$ID = $r[$id];
+						if($this->Key[$id] === false)
+							unset($r[$id]);
 					}
+					foreach($r as $k => $v)
+						$R[$ID][$k] = $v;
+					$i++;
 				}
-				foreach ($r as $k => $v) {
-					$R[$ID][$k] = $v;
+				$this->Key = array('id' => false);
+				if(empty($R))
+					$R = false;
+				else {
+					$this->nR = count($R);
+					$this->R = $R;
 				}
-				$i++;
-			}
-			$this->Key = array('id' => false);
-			if (empty($R)) {
-				$R = false;
-			} else {
-				$this->nR = count($R);
-				/*
-				if ($this->nR == 1) {
-					$ID      = key($R);
-					$R       = $R[$ID];
-					$R['id'] = $ID;
-				}
-				*/
-				$this->R = $R;
-			}
-		} else {
-			$this->E($Q);
+			}else
+				$this->E($Q);
+			return $R;
 		}
-		return $R;
-	}
 	/**
-	 * FunctionName ( $x [, $y [, $z]] )
+	 * pC ( $C )
 	 * --------------------------------------------------
-	 * Description of function here
+	 * Parse the connector string
 	 * --------------------------------------------------
-	 * @param int $x Description
-	 * @param string $y Description
-	 * @param array $z Description
+	 * @param string $C parse the connector string
 	 * --------------------------------------------------
 	 **/
-	public function pC($C) {
-		$HDBT = '/^([a-zA-Z0-9_]+)[\.]{1}([a-zA-Z0-9_]+)[\.]{1}([a-zA-Z0-9_\.]+)$/';
-		$DBT  = '/^([a-zA-Z0-9_]{3,})[\.]{1}([a-zA-Z0-9_]{3,})$/';
-		$DB   = '/^([a-zA-Z0-9_]{3,})$/';
-		$H    = @$this->N;
-		$D    = @$this->D;
-		$T    = @$this->T;
-		if (preg_match($HDBT, $C, $x)) {
-			$H = $x[1];
-			$D = $x[2];
-			$T = $x[3];
-		} elseif (preg_match($DBT, $C, $x)) {
-			$D = $x[1];
-			$T = $x[2];
-		} elseif (preg_match($DB, $C, $x)) {
-			$T = $x[1];
-		} else {
-			$this->E('Malformed Request');
-			return false;
+	public function pC($C)
+		{
+			$HDBT = '/^([a-zA-Z0-9_]+)[\.]{1}([a-zA-Z0-9_]+)[\.]{1}([a-zA-Z0-9_\.]+)$/';
+			$DBT  = '/^([a-zA-Z0-9_]{3,})[\.]{1}([a-zA-Z0-9_]{3,})$/';
+			$DB   = '/^([a-zA-Z0-9_]{3,})$/';
+			$H    = @$this->N;
+			$D    = @$this->D;
+			$T    = @$this->T;
+			if (preg_match($HDBT, $C, $x)) {
+				$H = $x[1];
+				$D = $x[2];
+				$T = $x[3];
+			} elseif (preg_match($DBT, $C, $x)) {
+				$D = $x[1];
+				$T = $x[2];
+			} elseif (preg_match($DB, $C, $x)) {
+				$T = $x[1];
+			} else {
+				$this->E('Malformed Request');
+				return false;
+			}
+			$this->H = $H;
+			$this->D = $D;
+			$this->T = $T;
+			return true;
 		}
-		$this->H = $H;
-		$this->D = $D;
-		$this->T = $T;
-		return true;
-	}
 }
 ?>

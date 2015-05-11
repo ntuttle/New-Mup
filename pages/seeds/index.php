@@ -1,26 +1,19 @@
 <?php
-/**
- * Start the Page
- * --------------------------------------------------
- **/
+# Start the Page
 require_once '../../_/core.php';
 $X = new X();
 
-/**
- * Loop through the different account types
- * --------------------------------------------------
- **/
+# Loop through the different account types
 foreach(['aol','hotmail','yahoo'] as $ESP){
-	/**
-	 * Accounts Overview Chart
-	 * --------------------------------------------------
-	 **/
+	# Accounts Overview Chart
 	$_id 		= $ESP.'SeedsStats';
 	$_title 	= '@'.$ESP.'.com - Chart';
 	$_width 	= html::Cols(12,6,4);
 	$_content 	= html::pageLoad('pages/seeds/modules/chart.zap.seed_accounts.php?esp='.$ESP,$_id);
-	$_tools[1]	= html::ModalBtn('pages/seeds/modules/table.zap.seed_accounts.php?modal=true&esp='.$ESP,'Accounts'.$_id,'Accounts','group','btn btn-primary btn-xs');
-	$_tools[2]	= html::ModalBtn('pages/seeds/modules/table.zap.seed_actions.php?modal=true&esp='.$ESP,'Actions'.$_id,'Actions','list-ol','btn btn-primary btn-xs');
+	$_url 		= 'pages/seeds/modules/table.zap.seed_accounts.php?modal=true&esp='.$ESP;
+	$_tools[1]	= html::ModalBtn('Accounts'.$_id,$_url,false,'fa-group fa-lg','btn-link txt-color-white');
+	$_url 		= 'pages/seeds/modules/table.zap.seed_actions.php?modal=true&esp='.$ESP;
+	$_tools[2]	= html::ModalBtn('Actions'.$_id,$_url,false,'fa-tasks fa-lg','btn-link txt-color-white');
 	$_[]  = html::MakeWidget($_id, $_content, $_title, $_width, $_tools);
 	$pops[] 	= 'Accounts'.$_id;
 	$pops[] 	= 'Actions'.$_id;
@@ -28,10 +21,7 @@ foreach(['aol','hotmail','yahoo'] as $ESP){
 foreach($pops as $pop)
 	$_[] = html::PopupModal($pop);
 
-/**
- * Print Widgets
- * --------------------------------------------------
- **/
+# Print Widgets
 $_ = implode(EOL,$_);
 echo $_;
 ?>
